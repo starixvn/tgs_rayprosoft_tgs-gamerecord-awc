@@ -4,6 +4,9 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>3b21c58e-ed4f-4d3c-bb68-016f1aeaa525</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileTag Condition="$(DockerfileTag) == ''">game/gamerecord-awc-service</DockerfileTag>
 	</PropertyGroup>
 
 	<ItemGroup>
