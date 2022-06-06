@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "game-gamerecord-manual-service.fullname" . }}
+  name: {{ include "game-gamerecord-awc-service.fullname" . }}
   labels:
-    {{- include "game-gamerecord-manual-service.labels" . | nindent 4 }}
+    {{- include "game-gamerecord-awc-service.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -12,4 +12,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "game-gamerecord-manual-service.selectorLabels" . | nindent 4 }}
+    {{- include "game-gamerecord-awc-service.selectorLabels" . | nindent 4 }}

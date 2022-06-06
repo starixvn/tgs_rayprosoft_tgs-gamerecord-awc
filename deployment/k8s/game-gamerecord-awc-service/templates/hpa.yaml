@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "game-gamerecord-manual-service.fullname" . }}
+  name: {{ include "game-gamerecord-awc-service.fullname" . }}
   labels:
-    {{- include "game-gamerecord-manual-service.labels" . | nindent 4 }}
+    {{- include "game-gamerecord-awc-service.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "game-gamerecord-manual-service.fullname" . }}
+    name: {{ include "game-gamerecord-awc-service.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
