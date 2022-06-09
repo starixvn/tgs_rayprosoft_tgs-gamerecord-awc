@@ -78,6 +78,7 @@ builder.Services
              var configuration = sp.GetRequiredService<IConfiguration>();
              options.Url = configuration.GetConnectionString("Nats");
          })
+         .AddHandler<ScheduleMessageHandler>("gp.gamerecord.schedule.awc", "gp.gamerecord.schedule")
          .AddProcessor<ManualMessageHandler>("gp.gamerecord.manual.awc", "gp.gamerecord.manual");
      })
      .ClearAllExchanges()

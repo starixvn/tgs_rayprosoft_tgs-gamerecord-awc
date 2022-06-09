@@ -1,4 +1,4 @@
-﻿namespace Tgs.GameRecord.KaiyuanService
+﻿namespace Tgs.GameRecord.AwcService
 {
     public record ScheduleMessageModel(
         Uri GameRecordApiUrl,
