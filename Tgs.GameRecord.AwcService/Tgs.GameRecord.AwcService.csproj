@@ -32,8 +32,4 @@
 		<ProjectReference Include="..\Tgs.GameRecord.AwcService.Core\Tgs.GameRecord.AwcService.Core.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="Controllers\" />
-	</ItemGroup>
-
 </Project>
