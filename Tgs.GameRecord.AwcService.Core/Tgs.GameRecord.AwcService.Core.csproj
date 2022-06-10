@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Scrutor" Version="4.1.0" />
-    <PackageReference Include="Tgs.GameInterface.AwcService.Client" Version="0.0.3" />
-    <PackageReference Include="Tgs.GameProviders.Client" Version="0.0.37" />
+    <PackageReference Include="Tgs.GameInterface.AwcService.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.GameProviders.Client" Version="0.0.38" />
     <PackageReference Include="Tgs.GameProviders.QueryServer.Client" Version="0.0.11" />
     <PackageReference Include="Tgs.MessageQueue" Version="2.1.0" />
     <PackageReference Include="Tgs.MessageQueue.MongoDB" Version="2.1.1" />
