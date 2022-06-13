@@ -7,9 +7,9 @@ namespace Tgs.GameRecord.AwcService
 {
     public class ManualMessageHandler : IMessageProcessor
     {
-        private readonly IGameRecordMuaualFactory _factory;
+        private readonly IGameRecordManualFactory _factory;
 
-        public ManualMessageHandler(IGameRecordMuaualFactory factory)
+        public ManualMessageHandler(IGameRecordManualFactory factory)
         {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
@@ -19,7 +19,7 @@ namespace Tgs.GameRecord.AwcService
             var json = Encoding.UTF8.GetString(data.Span);
             var request = JsonSerializer.Deserialize<ManualMessageRequest>(json)!;
 
-            var gameRecordCommand = new GameRecordMuaualCommand(
+            var gameRecordCommand = new GameRecordManualCommand(
                 GameRecordApiUrl: request.GameRecordApiUrl,
                 GameProviderAgentId: request.GameProviderAgentId,
                 GameProviderCert: request.GameProviderCert,

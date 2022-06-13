@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Tgs.GameRecord.AwcService.Core.MuaualWorkerServices;
 using Tgs.GameRecord.AwcService.ViewModels;
 using Tgs.ServiceUtility;
+using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 
 namespace Tgs.GameRecord.AwcService.Controllers
 {
