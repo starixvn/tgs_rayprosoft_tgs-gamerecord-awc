@@ -5,12 +5,12 @@ namespace Tgs.GameRecord.AwcService.Core.DispatchServices
 {
     internal class ScheduleDispatchService : ICommandService<ScheduleDispatchCommand>
     {
-        private readonly IGameRecordFactory _factory;
+        private readonly IGameRecordScheduleFactory _factory;
         private readonly GameRecordInfoOptions _gameRecordInfoOptions;
 
         public ScheduleDispatchService(
             IOptions<GameRecordInfoOptions> options,
-            IGameRecordFactory factory)
+            IGameRecordScheduleFactory factory)
         {
             _gameRecordInfoOptions = options.Value;
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
@@ -18,16 +18,14 @@ namespace Tgs.GameRecord.AwcService.Core.DispatchServices
 
         public ValueTask ExecuteAsync(ScheduleDispatchCommand command, CancellationToken cancellationToken = default)
         {
-            var endTime = DateTimeOffset.ParseExact(DateTimeOffset.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
+            var nowTime = DateTimeOffset.ParseExact(DateTimeOffset.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
+            var timeFrom = nowTime.AddMinutes((double)_gameRecordInfoOptions.IntervalMinute * -1);
 
-            var startTime = endTime.AddMinutes((double)_gameRecordInfoOptions.IntervalMinute * -1);
-
-            var gameRecordCommand = new GameRecordCommand(
+            var gameRecordCommand = new GameRecordScheduleCommand(
                 GameRecordApiUrl: command.GameRecordApiUrl,
                 GameProviderAgentId: command.GameProviderAgentId,
                 GameProviderCert: command.GameProviderCert,
-                StartTime: startTime,
-                EndTime: endTime);
+                TimeFrom: timeFrom);
 
             return _factory.ExecuteAsync(command.GameProviderCode, gameRecordCommand, cancellationToken: cancellationToken);
         }

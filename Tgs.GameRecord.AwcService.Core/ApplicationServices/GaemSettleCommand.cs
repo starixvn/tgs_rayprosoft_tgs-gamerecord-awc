@@ -2,5 +2,5 @@
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 {
-    public record GaemSettleCommand(Guid GameProviderId, string GameProviderCode, IEnumerable<GameSettleTransaction> Transactions);
+    public record GaemSettleCommand(Guid GameProviderId, string GameProviderCode, IEnumerable<GameInterfaceAwcServiceGameSettleRecord> Records);
 }
