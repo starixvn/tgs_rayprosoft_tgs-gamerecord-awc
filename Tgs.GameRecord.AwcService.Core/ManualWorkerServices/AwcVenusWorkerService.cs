@@ -9,12 +9,12 @@ namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices
     internal class AwcVenusWorkerService : ICommandService<AwcVenusCommand>
     {
         private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
-        private readonly ICommandService<GaemSettleCommand> _settleCommandService;
+        private readonly ICommandService<GameSettleCommand> _settleCommandService;
         private readonly IUtensil _utensil;
 
         public AwcVenusWorkerService(
             IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
-            ICommandService<GaemSettleCommand> settleCommandService,
+            ICommandService<GameSettleCommand> settleCommandService,
             IUtensil utensil)
         {
             _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
@@ -37,7 +37,7 @@ namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices
 
             if (gameSettle.Items.Any())
             {
-                await _settleCommandService.ExecuteAsync(new GaemSettleCommand(
+                await _settleCommandService.ExecuteAsync(new GameSettleCommand(
                       GameProviderId: gameProviderId,
                       GameProviderCode: gameProviderCode,
                       Records: gameSettle.Items), cancellationToken).ConfigureAwait(false);

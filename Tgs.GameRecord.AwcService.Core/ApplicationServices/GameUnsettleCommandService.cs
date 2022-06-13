@@ -3,12 +3,12 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 {
-    internal class GaemUnsettleCommandService : ICommandService<GaemUnsettleCommand>
+    internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
     {
         private readonly ICommandService<GameRoundCommand> _service;
         private readonly IUtensil _utensil;
 
-        public GaemUnsettleCommandService(
+        public GameUnsettleCommandService(
             ICommandService<GameRoundCommand> service,
             IUtensil utensil)
         {
@@ -16,7 +16,7 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
             _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         }
 
-        public async ValueTask ExecuteAsync(GaemUnsettleCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(GameUnsettleCommand command, CancellationToken cancellationToken = default)
         {
             foreach (var record in command.Records)
             {

@@ -3,12 +3,12 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 {
-    internal class GaemSettleCommandService : ICommandService<GaemSettleCommand>
+    internal class GamePullRecordCommandService : ICommandService<GamePullRecordCommand>
     {
         private readonly ICommandService<GameRoundCommand> _service;
         private readonly IUtensil _utensil;
 
-        public GaemSettleCommandService(
+        public GamePullRecordCommandService(
             ICommandService<GameRoundCommand> service,
             IUtensil utensil)
         {
@@ -16,7 +16,7 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
             _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         }
 
-        public async ValueTask ExecuteAsync(GaemSettleCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(GamePullRecordCommand command, CancellationToken cancellationToken = default)
         {
             foreach (var record in command.Records)
             {
@@ -43,10 +43,19 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
                 var externalCreatedOn = DateTimeOffset.ParseExact(record.BetTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
 
                 DateTimeOffset? externalClosedOn = null;
+                var betAmount = record.BetAmount;
+                var validBetAmount = record.RealBetAmount;
+                var settleAmount = default(decimal?);
+                var turnover = default(decimal?);
+                var playerWinLoss = default(decimal?);
                 if (status == GameRoundStatus.Closed)
                 {
                     externalClosedOn = DateTimeOffset.ParseExact(record.TxTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
+                    settleAmount = record.RealWinAmount;
+                    turnover = record.Turnover;
+                    playerWinLoss = settleAmount - validBetAmount;
                 }
+
                 var gameRoundCommand = new GameRoundCommand(
                     ExternalRoundId: record.ExternalRoundId,
                     GameProviderId: command.GameProviderId,
@@ -61,12 +70,12 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
                     ExternalCreatedOn: externalCreatedOn,
                     ExternalClosedOn: externalClosedOn,
                     BrandId: (playerModel == null) ? Guid.Empty : playerModel.BrandId,
-                    BetAmount: record.BetAmount,
-                    ValidBetAmount: record.RealBetAmount,
-                    SettleAmount: record.RealWinAmount,
+                    BetAmount: betAmount,
+                    ValidBetAmount: validBetAmount,
+                    SettleAmount: settleAmount,
                     Commission: 0,
-                    Turnover: record.Turnover,
-                    PlayerWinLoss: record.RealWinAmount - record.RealBetAmount,
+                    Turnover: turnover,
+                    PlayerWinLoss: playerWinLoss,
                     AdditionalData: JsonSerializer.Serialize(record),
                     ClientStatus: clientStatus,
                     Success: success);

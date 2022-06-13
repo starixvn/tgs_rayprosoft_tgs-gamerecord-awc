@@ -18,8 +18,8 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ManualWorkerServices
         public async Task Normal_Process()
         {
             var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
-            var fakeSettleCommandService = Substitute.For<ICommandService<GaemSettleCommand>>();
-            var fakeUnsettleCommandService = Substitute.For<ICommandService<GaemUnsettleCommand>>();
+            var fakeSettleCommandService = Substitute.For<ICommandService<GameSettleCommand>>();
+            var fakeUnsettleCommandService = Substitute.For<ICommandService<GameUnsettleCommand>>();
             var fakeUtensil = Substitute.For<IUtensil>();
 
             var command = new AwcRcbCommand(

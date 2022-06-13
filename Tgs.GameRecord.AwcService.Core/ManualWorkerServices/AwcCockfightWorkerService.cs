@@ -9,13 +9,13 @@ namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices
     internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
     {
         private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
-        private readonly ICommandService<GaemSettleCommand> _settleCommandService;
-        private readonly ICommandService<GaemUnsettleCommand> _unsettleCommandService;
+        private readonly ICommandService<GameSettleCommand> _settleCommandService;
+        private readonly ICommandService<GameUnsettleCommand> _unsettleCommandService;
         private readonly IUtensil _utensil;
 
         public AwcCockfightWorkerService(IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
-            ICommandService<GaemSettleCommand> settleCommandService,
-            ICommandService<GaemUnsettleCommand> unsettleCommandService,
+            ICommandService<GameSettleCommand> settleCommandService,
+            ICommandService<GameUnsettleCommand> unsettleCommandService,
             IUtensil utensil)
         {
             _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
@@ -38,7 +38,7 @@ namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices
 
             if (gameUnsettle.Items.Any())
             {
-                await _unsettleCommandService.ExecuteAsync(new GaemUnsettleCommand(
+                await _unsettleCommandService.ExecuteAsync(new GameUnsettleCommand(
                       GameProviderId: gameProviderId,
                       GameProviderCode: gameProviderCode,
                       Records: gameUnsettle.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -54,7 +54,7 @@ namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices
 
             if (gameSettle.Items.Any())
             {
-                await _settleCommandService.ExecuteAsync(new GaemSettleCommand(
+                await _settleCommandService.ExecuteAsync(new GameSettleCommand(
                       GameProviderId: gameProviderId,
                       GameProviderCode: gameProviderCode,
                       Records: gameSettle.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
