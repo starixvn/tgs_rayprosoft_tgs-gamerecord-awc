@@ -6,8 +6,8 @@ using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameInterface.AwcService.Protos;
 using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
-using Tgs.ServiceUtility;
 using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
+using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.UnitTest.ManualWorkerServices
 {

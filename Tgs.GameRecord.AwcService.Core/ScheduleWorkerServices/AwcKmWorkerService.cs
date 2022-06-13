@@ -30,7 +30,7 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
 
             while (timeFromDateTime is not null)
             {
-                var gamePullRecordReply = await _gameInterfaceAwcRecordServiceGrpc.GamePullRecordByAwcAeLottoAsync(
+                var gamePullRecordReply = await _gameInterfaceAwcRecordServiceGrpc.GamePullRecordByAwcKmAsync(
                     command.GameRecordApiUrl,
                     command.GameProviderAgentId,
                     command.GameProviderCert,

@@ -2,7 +2,6 @@
 using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
-using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 
 namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices
 {

@@ -31,14 +31,13 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
 
             _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is(GameProviderType.AWC_AWS)).Returns(gameProviderId);
 
-            var gameSettle = new GameInterfaceAwcServiceGameSettleRecordReply();
+            var gamePullRecordReply = new GameInterfaceAwcServiceGamePullRecordReply();
             _ = fakeGameInterfaceAwcRecordServiceGrpc
-                .GameSettleByAwcAwsAsync(
+                .GamePullRecordByAwcAwsAsync(
                     Arg.Is(command.GameRecordApiUrl),
                     Arg.Is(command.GameProviderAgentId),
                     Arg.Is(command.GameProviderCert),
-                    Arg.Any<DateTimeOffset>(),
-                    Arg.Any<DateTimeOffset>()).Returns(gameSettle);
+                    Arg.Any<DateTimeOffset>()).Returns(gamePullRecordReply);
 
             var service = new AwcAwsWorkerservice(
                 fakeGameInterfaceAwcRecordServiceGrpc,
