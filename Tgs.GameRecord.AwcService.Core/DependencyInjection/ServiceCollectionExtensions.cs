@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
                 .AddGameProvidersQueryServerClient(gameProvidersQueryServerClientOptions)
                 .AddGameProvidersClient(gameProvidersClientOptions)
-                .AddScoped<IGameRecordFactory, GameRecordFactory>()
+                .AddScoped<IGameRecordManualFactory, GameRecordManualFactory>()
                 .AddTransient<IUtensil, UtensilRepository>()
                 .Decorate<IUtensil>((innerRepository, sp) => ActivatorUtilities.CreateInstance<UtensilMemoryCacheRepository>(sp, innerRepository, TimeSpan.FromHours(1)));
     }

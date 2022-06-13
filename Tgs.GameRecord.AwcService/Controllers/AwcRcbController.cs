@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Tgs.GameRecord.AwcService.Core.WorkerServices;
+using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 using Tgs.GameRecord.AwcService.ViewModels;
 using Tgs.ServiceUtility;
 
