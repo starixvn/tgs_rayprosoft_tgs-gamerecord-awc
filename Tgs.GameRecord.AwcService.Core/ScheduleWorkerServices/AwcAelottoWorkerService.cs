@@ -37,7 +37,7 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
                     command.TimeFrom,
                     cancellationToken).ConfigureAwait(false);
 
-                if (gamePullRecordReply.Items.Any())
+                if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())
                 {
                     await _pullRecordCommandService.ExecuteAsync(new GamePullRecordCommand(
                       GameProviderId: gameProviderId,
