@@ -35,8 +35,8 @@ namespace Tgs.GameRecord.AwcService
 
             return _service.ExecuteAsync(new ScheduleDispatchCommand(
                 GameRecordApiUrl: messageModel.GameRecordApiUrl,
+                GameProviderId: messageModel.GameProviderId,
                 GameProviderCode: messageModel.GameProviderCode,
-                BrandCode: messageModel.BrandCode,
                 GameProviderAgentId: messageModel.GameProviderAgentId,
                 GameProviderCert: messageModel.GameProviderCert), cancellationToken);
         }

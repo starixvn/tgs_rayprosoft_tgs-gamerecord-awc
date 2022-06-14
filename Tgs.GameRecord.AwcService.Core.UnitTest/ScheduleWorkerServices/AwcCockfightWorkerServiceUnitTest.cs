@@ -25,13 +25,11 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
 
             var command = new AwcCockfightCommand(
                 GameRecordApiUrl: new("http://localhost/"),
+                GameProviderId: Guid.NewGuid(),
+                GameProviderCode: GameProviderType.AWC_COCKFIGHT,
                 GameProviderAgentId: "testAgentId",
                 GameProviderCert: "testCert",
                 TimeFrom: DateTime.UtcNow.AddMinutes(-1));
-
-            var gameProviderId = Guid.NewGuid();
-
-            _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is(GameProviderType.AWC_COCKFIGHT)).Returns(gameProviderId);
 
             var gamePullRecordReply = new GameInterfaceAwcServiceGamePullRecordReply();
             _ = fakeGameInterfaceAwcRecordServiceGrpc
@@ -44,8 +42,7 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
             var service = new AwcCockfightWorkerService(
                 fakeGameInterfaceAwcRecordServiceGrpc,
                 fakeLogger,
-                fakePullRecordCommandService,
-                fakeUtensil);
+                fakePullRecordCommandService);
 
             await service.ExecuteAsync(command).ConfigureAwait(false);
         }

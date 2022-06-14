@@ -21,13 +21,13 @@ namespace Tgs.GameRecord.AwcService.Core.DispatchServices
             var nowTime = DateTimeOffset.ParseExact(DateTimeOffset.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
             var timeFrom = nowTime.AddMinutes((double)_gameRecordInfoOptions.IntervalMinute * -1);
 
-            var gameRecordCommand = new GameRecordScheduleCommand(
+            return _factory.ExecuteAsync(new GameRecordScheduleCommand(
                 GameRecordApiUrl: command.GameRecordApiUrl,
+                GameProviderId: command.GameProviderId,
+                GameProviderCode: command.GameProviderCode,
                 GameProviderAgentId: command.GameProviderAgentId,
                 GameProviderCert: command.GameProviderCert,
-                TimeFrom: timeFrom);
-
-            return _factory.ExecuteAsync(command.GameProviderCode, gameRecordCommand, cancellationToken: cancellationToken);
+                TimeFrom: timeFrom), cancellationToken: cancellationToken);
         }
     }
 }

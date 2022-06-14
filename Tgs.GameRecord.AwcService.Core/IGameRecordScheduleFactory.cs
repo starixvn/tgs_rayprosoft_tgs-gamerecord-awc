@@ -2,6 +2,6 @@
 {
     public interface IGameRecordScheduleFactory
     {
-        ValueTask ExecuteAsync(string gameProviderCode, GameRecordScheduleCommand command, CancellationToken cancellationToken = default);
+        ValueTask ExecuteAsync(GameRecordScheduleCommand command, CancellationToken cancellationToken = default);
     }
 }

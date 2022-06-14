@@ -52,72 +52,98 @@ namespace Tgs.GameRecord.AwcService.Core
             _awcYlWorkerService = awcYlWorkerService ?? throw new ArgumentNullException(nameof(awcYlWorkerService));
         }
 
-        public ValueTask ExecuteAsync(string gameProviderCode, GameRecordScheduleCommand command, CancellationToken cancellationToken = default)
+        public ValueTask ExecuteAsync(GameRecordScheduleCommand command, CancellationToken cancellationToken = default)
         {
-            return gameProviderCode switch
+            return command.GameProviderCode switch
             {
                 var code when code == GameProviderType.AWC_AELOTTO => _awcAelottoWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_AWS => _awcAwsWorkerservice.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_COCKFIGHT => _awcCockfightWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_FACAI => _awcFacaiWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_FS => _awcFsWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_KM => _awcKmWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_LUDO => _awcLudoWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_PGS => _awcPgsWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_RCB => _awcRcbCommand.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_SG => _awcSgCommand.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_SPADE => _awcSpadeCommand.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_VENUS => _awcVenusWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),
                 var code when code == GameProviderType.AWC_YL => _awcYlWorkerService.ExecuteAsync(new(
                                                                         GameRecordApiUrl: command.GameRecordApiUrl,
+                                                                        GameProviderId: command.GameProviderId,
+                                                                        GameProviderCode: command.GameProviderCode,
                                                                         GameProviderAgentId: command.GameProviderAgentId,
                                                                         GameProviderCert: command.GameProviderCert,
                                                                         TimeFrom: command.TimeFrom), cancellationToken),

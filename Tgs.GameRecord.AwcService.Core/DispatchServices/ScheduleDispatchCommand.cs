@@ -2,8 +2,8 @@
 {
     public record ScheduleDispatchCommand(
         Uri GameRecordApiUrl,
+        Guid GameProviderId,
         string GameProviderCode,
-        string BrandCode,
         string GameProviderAgentId,
         string GameProviderCert);
 }

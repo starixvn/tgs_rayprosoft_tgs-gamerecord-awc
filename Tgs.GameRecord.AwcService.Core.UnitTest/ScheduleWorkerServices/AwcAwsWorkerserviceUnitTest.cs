@@ -21,17 +21,14 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
             var fakeLogger = NullLogger<AwcAwsWorkerservice>.Instance;
             var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
             var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
-            var fakeUtensil = Substitute.For<IUtensil>();
 
             var command = new AwcAwsCommand(
                 GameRecordApiUrl: new("http://localhost/"),
+                GameProviderId: Guid.NewGuid(),
+                GameProviderCode: GameProviderType.AWC_AWS,
                 GameProviderAgentId: "testAgentId",
                 GameProviderCert: "testCert",
                 TimeFrom: DateTime.UtcNow.AddMinutes(-1));
-
-            var gameProviderId = Guid.NewGuid();
-
-            _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is(GameProviderType.AWC_AWS)).Returns(gameProviderId);
 
             var gamePullRecordReply = new GameInterfaceAwcServiceGamePullRecordReply();
             _ = fakeGameInterfaceAwcRecordServiceGrpc
@@ -44,8 +41,7 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
             var service = new AwcAwsWorkerservice(
                 fakeGameInterfaceAwcRecordServiceGrpc,
                 fakeLogger,
-                fakePullRecordCommandService,
-                fakeUtensil);
+                fakePullRecordCommandService);
 
             await service.ExecuteAsync(command).ConfigureAwait(false);
         }
