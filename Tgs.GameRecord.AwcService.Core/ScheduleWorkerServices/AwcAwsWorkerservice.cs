@@ -1,4 +1,5 @@
-﻿using Tgs.GameInterface.AwcService.Client;
+﻿using Microsoft.Extensions.Logging;
+using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
@@ -7,15 +8,18 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
 {
     internal class AwcAwsWorkerservice : ICommandService<AwcAwsCommand>
     {
+        private readonly ILogger<AwcAwsWorkerservice> _logger;
         private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
         private readonly ICommandService<GamePullRecordCommand> _pullRecordCommandService;
         private readonly IUtensil _utensil;
 
         public AwcAwsWorkerservice(
+            ILogger<AwcAwsWorkerservice> logger,
             IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
             ICommandService<GamePullRecordCommand> pullRecordCommandService,
             IUtensil utensil)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
             _pullRecordCommandService = pullRecordCommandService ?? throw new ArgumentNullException(nameof(pullRecordCommandService));
             _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
@@ -36,6 +40,18 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
                     command.GameProviderCert,
                     command.TimeFrom,
                     cancellationToken).ConfigureAwait(false);
+
+                _logger.LogInformation("LogOn:{logOn} | Request:{request} | Response:{response}",
+                    DateTime.UtcNow.ToString("O"),
+                    new
+                    {
+                        command.GameRecordApiUrl,
+                        command.GameProviderAgentId,
+                        command.GameProviderCert,
+                        command.TimeFrom
+                    },
+                    gamePullRecordReply
+                    );
 
                 if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())
                 {

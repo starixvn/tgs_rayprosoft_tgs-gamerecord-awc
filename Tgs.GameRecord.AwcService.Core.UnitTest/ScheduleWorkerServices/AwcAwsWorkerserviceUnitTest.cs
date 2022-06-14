@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.GameInterface.AwcService.Client;
@@ -17,6 +18,7 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
         [TestMethod]
         public async Task Normal_Process()
         {
+            var fakeLogger = NullLogger<AwcAwsWorkerservice>.Instance;
             var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
             var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
             var fakeUtensil = Substitute.For<IUtensil>();
@@ -40,6 +42,7 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
                     Arg.Any<DateTimeOffset>()).Returns(gamePullRecordReply);
 
             var service = new AwcAwsWorkerservice(
+                fakeLogger,
                 fakeGameInterfaceAwcRecordServiceGrpc,
                 fakePullRecordCommandService,
                 fakeUtensil);
