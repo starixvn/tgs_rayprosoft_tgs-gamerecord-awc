@@ -1,4 +1,5 @@
-﻿using Tgs.GameInterface.AwcService.Client;
+﻿using Microsoft.Extensions.Logging;
+using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
@@ -8,15 +9,18 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
     internal class AwcPgsWorkerService : ICommandService<AwcPgsCommand>
     {
         private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
+        private readonly ILogger<AwcPgsWorkerService> _logger;
         private readonly ICommandService<GamePullRecordCommand> _pullRecordCommandService;
         private readonly IUtensil _utensil;
 
         public AwcPgsWorkerService(
             IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
+            ILogger<AwcPgsWorkerService> logger,
             ICommandService<GamePullRecordCommand> pullRecordCommandService,
             IUtensil utensil)
         {
             _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _pullRecordCommandService = pullRecordCommandService ?? throw new ArgumentNullException(nameof(pullRecordCommandService));
             _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         }
@@ -36,6 +40,11 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
                     command.GameProviderCert,
                     command.TimeFrom,
                     cancellationToken).ConfigureAwait(false);
+
+                _logger.LogInformation("LogOn:{logOn} | Request:{request} | Response:{response}",
+                    DateTime.UtcNow.ToString("O"),
+                    command,
+                    gamePullRecordReply);
 
                 if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())
                 {

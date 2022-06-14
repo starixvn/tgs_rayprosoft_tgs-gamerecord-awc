@@ -42,8 +42,8 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
                     Arg.Any<DateTimeOffset>()).Returns(gamePullRecordReply);
 
             var service = new AwcAwsWorkerservice(
-                fakeLogger,
                 fakeGameInterfaceAwcRecordServiceGrpc,
+                fakeLogger,
                 fakePullRecordCommandService,
                 fakeUtensil);
 

@@ -8,19 +8,19 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
 {
     internal class AwcAwsWorkerservice : ICommandService<AwcAwsCommand>
     {
-        private readonly ILogger<AwcAwsWorkerservice> _logger;
         private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
+        private readonly ILogger<AwcAwsWorkerservice> _logger;
         private readonly ICommandService<GamePullRecordCommand> _pullRecordCommandService;
         private readonly IUtensil _utensil;
 
         public AwcAwsWorkerservice(
-            ILogger<AwcAwsWorkerservice> logger,
             IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
+            ILogger<AwcAwsWorkerservice> logger,
             ICommandService<GamePullRecordCommand> pullRecordCommandService,
             IUtensil utensil)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _pullRecordCommandService = pullRecordCommandService ?? throw new ArgumentNullException(nameof(pullRecordCommandService));
             _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
         }
@@ -43,15 +43,8 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
 
                 _logger.LogInformation("LogOn:{logOn} | Request:{request} | Response:{response}",
                     DateTime.UtcNow.ToString("O"),
-                    new
-                    {
-                        command.GameRecordApiUrl,
-                        command.GameProviderAgentId,
-                        command.GameProviderCert,
-                        command.TimeFrom
-                    },
-                    gamePullRecordReply
-                    );
+                    command,
+                    gamePullRecordReply);
 
                 if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())
                 {
