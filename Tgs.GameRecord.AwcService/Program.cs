@@ -36,6 +36,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddMemoryCache();
 
+builder.Services.AddGameRecordAwcService((options, sp) =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    options.ConnectionString = configuration.GetConnectionString("Redis");
+});
+
 builder.Services.AddAwcServiceCore((options, sp) =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();
@@ -55,7 +61,8 @@ builder.Services.AddAwcServiceCore((options, sp) =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();
     options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameProvidersBaseUrl");
-});
+},
+(sp) => sp.GetRequiredService<RedisConnectionManager>().Database);
 
 builder.Services
     .AddMessageQueue()
