@@ -22,7 +22,7 @@ namespace Tgs.GameRecord.AwcService.Core.DispatchServices
 
         public async ValueTask ExecuteAsync(ScheduleDispatchCommand command, CancellationToken cancellationToken = default)
         {
-            var key = $"{command.GameProviderCode}:{command.GameProviderAgentId}".ToLower();
+            var key = $"GameRecord:AwcService:{command.GameProviderCode}:{command.GameProviderAgentId}".ToLower();
             if (!await _scheduleDispatch.ExistAsync(key: key).ConfigureAwait(false))
             {
                 if (await _scheduleDispatch.LockingAsync(key: key, command: command).ConfigureAwait(false))
