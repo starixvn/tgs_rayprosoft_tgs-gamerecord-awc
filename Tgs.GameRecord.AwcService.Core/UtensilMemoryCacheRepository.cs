@@ -12,9 +12,9 @@ namespace Tgs.GameRecord.AwcService.Core
         private readonly IUtensil _utensil;
 
         public UtensilMemoryCacheRepository(
+            IUtensil utensil,
             TimeSpan absoluteExpirationRelativeToNow,
             IOptions<GameRecordInfoOptions> options,
-            IUtensil utensil,
             IMemoryCache memoryCache)
         {
             _absoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow;

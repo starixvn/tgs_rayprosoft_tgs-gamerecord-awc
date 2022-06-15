@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddGameProvidersClient(gameProvidersClientOptions)
                 .AddScoped<IGameRecordManualFactory, GameRecordManualFactory>()
                 .AddScoped<IGameRecordScheduleFactory, GameRecordScheduleFactory>()
-                .AddTransient<IScheduleDispatch>(sp => ActivatorUtilities.CreateInstance<ScheduleDispatch>(sp, redisDatabaseResolver(sp), TimeSpan.FromHours(2)))
+                .AddTransient<IScheduleDispatch>(sp => ActivatorUtilities.CreateInstance<ScheduleDispatch>(sp, redisDatabaseResolver(sp), TimeSpan.FromMinutes(2)))
                 .AddTransient<IUtensil, UtensilRepository>()
                 .Decorate<IUtensil>((innerRepository, sp) => ActivatorUtilities.CreateInstance<UtensilMemoryCacheRepository>(sp, innerRepository, TimeSpan.FromHours(1)));
     }
