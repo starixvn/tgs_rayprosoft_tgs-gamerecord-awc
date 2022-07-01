@@ -98,6 +98,7 @@ builder.Services
      .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.ludo", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.ludo")
      .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.pgs", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.pgs")
      .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.rcb", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.rcb")
+     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.sg", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.sg")
      .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.spade", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.spade")
      .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.venus", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.venus")
      .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.yl", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.yl");
