@@ -56,6 +56,33 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
                     playerWinLoss = settleAmount - validBetAmount;
                 }
 
+                var additionalData = new
+                {
+                    record.ExternalRoundId,
+                    record.Platform,
+                    record.PlatformTxId,
+                    record.GameType,
+                    record.GameCode,
+                    record.GameName,
+                    record.RoundId,
+                    record.UserId,
+                    record.Currency,
+                    record.TxStatus,
+                    record.SettleStatus,
+                    record.BetTime,
+                    record.TxTime,
+                    record.UpdateTime,
+                    record.BetType,
+                    BetAmount = record.BetAmount.ToDecimal(),
+                    RealBetAmount = record.RealBetAmount.ToDecimal(),
+                    Turnover = record.Turnover.ToDecimal(),
+                    WinAmount = record.WinAmount.ToDecimal(),
+                    RealWinAmount = record.RealWinAmount.ToDecimal(),
+                    JackpotBetAmount = record.JackpotBetAmount.ToDecimal(),
+                    JackpotWinAmount = record.JackpotWinAmount.ToDecimal(),
+                    record.GameInfo
+                };
+
                 var gameRoundCommand = new GameRoundCommand(
                     ExternalRoundId: record.ExternalRoundId,
                     GameProviderId: command.GameProviderId,
@@ -76,7 +103,7 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
                     Commission: 0,
                     Turnover: turnover,
                     PlayerWinLoss: playerWinLoss,
-                    AdditionalData: JsonSerializer.Serialize(record),
+                    AdditionalData: JsonSerializer.Serialize(additionalData),
                     ClientStatus: clientStatus,
                     Success: success);
 
