@@ -106,7 +106,7 @@ builder.Services
 builder.Services
      .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
         sp => new ConfigureNamedOptions<OtlpExporterOptions>(
-            Microsoft.Extensions.Options.Options.DefaultName,
+            Options.DefaultName,
             exporterOptions =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
