@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: configmap-{{ include "game-gamerecord-awc-service.name" . }}
+  name: configmap-{{ include "game-gamerecord-awc-service.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "game-gamerecord-awc-service.labels" . | nindent 4 }}
