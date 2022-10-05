@@ -1,4 +1,4 @@
-﻿namespace Tgs.GameRecord.AwcService.ViewModels
+﻿namespace Tgs.GameRecord.AwcManualService.ViewModels
 {
     public record GameRecordQueryViewModel(
         Uri GameRecordApiUrl,

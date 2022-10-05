@@ -4,6 +4,7 @@ using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameRecord.AwcService;
+using Tgs.GameRecord.AwcService.Core;
 using Tgs.MessageQueue.MongoDB.Configuration;
 using MongoMessageQueue = MongoDB.Messaging.MessageQueue;
 
@@ -64,13 +65,15 @@ builder.Services.AddAwcServiceCore((options, sp) =>
 },
 (sp) => sp.GetRequiredService<RedisConnectionManager>().Database);
 
+var gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>();
+
 builder.Services
     .AddMessageQueue()
     .AddMongoMessageQueue(config =>
     {
         _ = config
         .DefineMessageQueue(
-            "gp.gamerecord.database",
+            gameRecordInfo.MongoDefine,
             sp => new MongoMessageQueueBuilderOptions
             {
                 MessageQueue = MongoMessageQueue.Default,
@@ -85,23 +88,22 @@ builder.Services
              var configuration = sp.GetRequiredService<IConfiguration>();
              options.Url = configuration.GetConnectionString("Nats");
          })
-         .AddHandler<ScheduleMessageHandler>("gp.gamerecord.schedule.awc", "gp.gamerecord.schedule")
-         .AddProcessor<ManualMessageHandler>("gp.gamerecord.manual.awc", "gp.gamerecord.manual");
+         .AddHandler<ScheduleMessageHandler>("gp.gamerecord.schedule.awc", "gp.gamerecord.schedule");
      })
      .ClearAllExchanges()
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.aelotto", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.aelotto")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.aws", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.aws")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.cockfight", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.cockfight")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.facai", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.facai")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.fs", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.fs")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.km", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.km")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.ludo", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.ludo")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.pgs", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.pgs")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.rcb", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.rcb")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.sg", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.sg")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.spade", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.spade")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.venus", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.venus")
-     .AddMongoGlobPatternExchange("tgs.gp.gamerecord.database.round.awc.yl", "gp.gamerecord.database", "tgs.gp.gamerecord.database.round.awc.yl");
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.aelotto", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.aelotto")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.aws", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.aws")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.cockfight", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.cockfight")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.facai", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.facai")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.fs", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.fs")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.km", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.km")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.ludo", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.ludo")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.pgs", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.pgs")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.rcb", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.rcb")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.sg", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.sg")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.spade", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.spade")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.venus", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.venus")
+     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.yl", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.yl");
 
 builder.Services
      .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
