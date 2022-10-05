@@ -4,5 +4,9 @@
     {
         public string GameProviderCode { get; set; } = default!;
         public decimal IntervalMinute { get; set; } = 1;
+
+        public string MongoDefine { get; set; } = default!;
+
+        public string MongoGlobPatternPrefix { get; set; } = default!;
     }
 }

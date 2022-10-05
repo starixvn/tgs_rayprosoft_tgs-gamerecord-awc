@@ -1,19 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Tgs.GameRecord.AwcManualService.ViewModels;
 using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
-using Tgs.GameRecord.AwcService.ViewModels;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameRecord.AwcService.Controllers
+namespace Tgs.GameRecord.AwcManualService.Controllers
 {
     [ApiController]
-    [Route("awc_venus")]
-    public class AwcVenusController : ControllerBase
+    [Route("awc_pgs")]
+    public class AwcPgsController : ControllerBase
     {
         [HttpPost]
         public ValueTask ExecuteAsync(
-            [FromServices] ICommandService<AwcVenusCommand> service,
+            [FromServices] ICommandService<AwcPgsCommand> service,
             GameRecordQueryViewModel model)
-            => service.ExecuteAsync(new AwcVenusCommand(
+            => service.ExecuteAsync(new AwcPgsCommand(
                 GameRecordApiUrl: model.GameRecordApiUrl,
                 GameProviderAgentId: model.GameProviderAgentId,
                 GameProviderCert: model.GameProviderCert,
