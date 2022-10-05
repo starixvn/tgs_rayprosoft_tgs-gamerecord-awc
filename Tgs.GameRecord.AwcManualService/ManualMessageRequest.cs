@@ -1,4 +1,4 @@
-﻿namespace Tgs.GameRecord.AwcService
+﻿namespace Tgs.GameRecord.AwcManualService
 {
     public record ManualMessageRequest(
         Uri GameRecordApiUrl,

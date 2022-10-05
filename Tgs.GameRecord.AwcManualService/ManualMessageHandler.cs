@@ -3,7 +3,7 @@ using System.Text.Json;
 using Tgs.GameRecord.AwcService.Core;
 using Tgs.MessageQueue;
 
-namespace Tgs.GameRecord.AwcService
+namespace Tgs.GameRecord.AwcManualService
 {
     public class ManualMessageHandler : IMessageProcessor
     {

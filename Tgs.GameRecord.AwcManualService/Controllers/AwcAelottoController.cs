@@ -1,19 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Tgs.GameRecord.AwcManualService.ViewModels;
 using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
-using Tgs.GameRecord.AwcService.ViewModels;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameRecord.AwcService.Controllers
+namespace Tgs.GameRecord.AwcManualService.Controllers
 {
     [ApiController]
-    [Route("awc_vl")]
-    public class AwcYlController : ControllerBase
+    [Route("awc_aelotto")]
+    public class AwcAelottoController : ControllerBase
     {
         [HttpPost]
         public ValueTask ExecuteAsync(
-            [FromServices] ICommandService<AwcYlCommand> service,
+            [FromServices] ICommandService<AwcAelottoCommand> service,
             GameRecordQueryViewModel model)
-            => service.ExecuteAsync(new AwcYlCommand(
+            => service.ExecuteAsync(new AwcAelottoCommand(
                 GameRecordApiUrl: model.GameRecordApiUrl,
                 GameProviderAgentId: model.GameProviderAgentId,
                 GameProviderCert: model.GameProviderCert,
