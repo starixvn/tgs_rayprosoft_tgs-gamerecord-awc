@@ -1,15 +1,17 @@
 ﻿using System.Text.Json;
+using Tgs.GameRounds.Common;
+using Tgs.GameRounds.Common.MessageModels;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 {
     internal class GameSettleCommandService : ICommandService<GameSettleCommand>
     {
-        private readonly ICommandService<GameRoundCommand> _service;
+        private readonly ICommandService<GameRecordMessage> _service;
         private readonly IUtensil _utensil;
 
         public GameSettleCommandService(
-            ICommandService<GameRoundCommand> service,
+            ICommandService<GameRecordMessage> service,
             IUtensil utensil)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
@@ -47,7 +49,7 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
                 {
                     externalClosedOn = DateTimeOffset.ParseExact(record.TxTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
                 }
-                var gameRoundCommand = new GameRoundCommand(
+                var gameRoundCommand = new GameRecordMessage(
                     ExternalRoundId: record.ExternalRoundId,
                     GameProviderId: command.GameProviderId,
                     GameProviderCode: command.GameProviderCode,

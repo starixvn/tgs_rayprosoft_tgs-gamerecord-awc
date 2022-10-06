@@ -1,28 +1,29 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
+using Tgs.GameRounds.Common.MessageModels;
 using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 {
-    internal class GameRoundCommandService : ICommandService<GameRoundCommand>
+    internal class GameRecordMessageService : ICommandService<GameRecordMessage>
     {
-        private readonly ILogger<GameRoundCommandService> _logger;
+        private readonly ILogger<GameRecordMessageService> _logger;
         private readonly IMessageSender _messageSender;
         private readonly GameRecordInfoOptions _gameRecordInfoOptions;
 
-        public GameRoundCommandService(
+        public GameRecordMessageService(
             IOptions<GameRecordInfoOptions> options,
             IMessageSender messageSender,
-            ILogger<GameRoundCommandService> logger)
+            ILogger<GameRecordMessageService> logger)
         {
             _gameRecordInfoOptions = options.Value;
             _messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public ValueTask ExecuteAsync(GameRoundCommand command, CancellationToken cancellationToken = default)
+        public ValueTask ExecuteAsync(GameRecordMessage command, CancellationToken cancellationToken = default)
         {
             var GameProviderCodeSplit = command.GameProviderCode.ToLower().Split('_');
             var subject = $"{_gameRecordInfoOptions.MongoGlobPatternPrefix}.{GameProviderCodeSplit[1]}";

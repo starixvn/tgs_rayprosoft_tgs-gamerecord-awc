@@ -1,15 +1,17 @@
 ﻿using System.Text.Json;
+using Tgs.GameRounds.Common;
+using Tgs.GameRounds.Common.MessageModels;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 {
     internal class GamePullRecordCommandService : ICommandService<GamePullRecordCommand>
     {
-        private readonly ICommandService<GameRoundCommand> _service;
+        private readonly ICommandService<GameRecordMessage> _service;
         private readonly IUtensil _utensil;
 
         public GamePullRecordCommandService(
-            ICommandService<GameRoundCommand> service,
+            ICommandService<GameRecordMessage> service,
             IUtensil utensil)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
@@ -83,7 +85,7 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
                     record.GameInfo
                 };
 
-                var gameRoundCommand = new GameRoundCommand(
+                var gameRoundCommand = new GameRecordMessage(
                     ExternalRoundId: record.ExternalRoundId,
                     GameProviderId: command.GameProviderId,
                     GameProviderCode: command.GameProviderCode,
@@ -99,10 +101,10 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
                     BrandId: (playerModel == null) ? Guid.Empty : playerModel.BrandId,
                     BetAmount: betAmount,
                     ValidBetAmount: validBetAmount,
-                    SettleAmount: settleAmount,
+                    SettleAmount: settleAmount.GetValueOrDefault(0),
                     Commission: 0,
-                    Turnover: turnover,
-                    PlayerWinLoss: playerWinLoss,
+                    Turnover: turnover.GetValueOrDefault(0),
+                    PlayerWinLoss: playerWinLoss.GetValueOrDefault(0),
                     AdditionalData: JsonSerializer.Serialize(additionalData),
                     ClientStatus: clientStatus,
                     Success: success);

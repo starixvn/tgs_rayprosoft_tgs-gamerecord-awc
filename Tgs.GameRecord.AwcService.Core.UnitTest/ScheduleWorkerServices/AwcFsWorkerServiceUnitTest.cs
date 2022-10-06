@@ -21,7 +21,6 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
             var fakeLogger = NullLogger<AwcFsWorkerService>.Instance;
             var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
             var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
-            var fakeUtensil = Substitute.For<IUtensil>();
 
             var command = new AwcFsCommand(
                 GameRecordApiUrl: new("http://localhost/"),
