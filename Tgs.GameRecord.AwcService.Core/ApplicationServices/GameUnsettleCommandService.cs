@@ -1,15 +1,17 @@
 ﻿using System.Text.Json;
+using Tgs.GameRounds.Common;
+using Tgs.GameRounds.Common.MessageModels;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 {
     internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
     {
-        private readonly ICommandService<GameRoundCommand> _service;
+        private readonly ICommandService<GameRecordMessage> _service;
         private readonly IUtensil _utensil;
 
         public GameUnsettleCommandService(
-            ICommandService<GameRoundCommand> service,
+            ICommandService<GameRecordMessage> service,
             IUtensil utensil)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
@@ -40,7 +42,7 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 
                 var externalCreatedOn = DateTimeOffset.ParseExact(record.BetTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
 
-                var gameRoundCommand = new GameRoundCommand(
+                var gameRoundCommand = new GameRecordMessage(
                     ExternalRoundId: record.ExternalRoundId,
                     GameProviderId: command.GameProviderId,
                     GameProviderCode: command.GameProviderCode,
@@ -56,10 +58,10 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
                     BrandId: (playerModel == null) ? Guid.Empty : playerModel.BrandId,
                     BetAmount: record.BetAmount,
                     ValidBetAmount: record.RealBetAmount,
-                    SettleAmount: null,
+                    SettleAmount: 0,
                     Commission: 0,
-                    Turnover: null,
-                    PlayerWinLoss: null,
+                    Turnover: 0,
+                    PlayerWinLoss: 0,
                     AdditionalData: JsonSerializer.Serialize(record),
                     ClientStatus: GameRoundClientStatus.Open,
                     Success: success);
