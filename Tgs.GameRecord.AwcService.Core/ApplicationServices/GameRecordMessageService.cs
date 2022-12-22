@@ -9,9 +9,9 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices
 {
     internal class GameRecordMessageService : ICommandService<GameRecordMessage>
     {
+        private readonly GameRecordInfoOptions _gameRecordInfoOptions;
         private readonly ILogger<GameRecordMessageService> _logger;
         private readonly IMessageSender _messageSender;
-        private readonly GameRecordInfoOptions _gameRecordInfoOptions;
 
         public GameRecordMessageService(
             IOptions<GameRecordInfoOptions> options,
