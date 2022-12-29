@@ -48,11 +48,15 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
 
                     try
                     {
-                        timeFromDateTime = DateTimeOffset.ParseExact(
-                            gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).Single().UpdateTime,
-                            @"yyyy-MM-dd\THH:mm:ssK",
-                            null,
-                            styles: System.Globalization.DateTimeStyles.RoundtripKind);
+                        var item = gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First();
+
+                        if (!string.IsNullOrEmpty(item.UpdateTime))
+
+                            timeFromDateTime = DateTimeOffset.ParseExact(
+                                item.UpdateTime,
+                                @"yyyy-MM-dd\THH:mm:ssK",
+                                null,
+                                styles: System.Globalization.DateTimeStyles.RoundtripKind);
                     }
                     catch (Exception ex)
                     {
