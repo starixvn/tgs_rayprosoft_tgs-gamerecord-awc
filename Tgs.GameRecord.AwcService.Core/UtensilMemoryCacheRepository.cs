@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Tgs.GameProviders.QueryServer.Models;
+using Tgs.GameCommand.Common;
 using Tgs.GameRounds.Common;
 
 namespace Tgs.GameRecord.AwcService.Core
@@ -49,7 +49,7 @@ namespace Tgs.GameRecord.AwcService.Core
 
                 if (gameId.HasValue)
                 {
-                    _ = _memoryCache.Set(key, gameId, absoluteExpirationRelativeToNow: _absoluteExpirationRelativeToNow);
+                    _ = _memoryCache.Set(key, gameId);
                 }
             }
             return gameId;
@@ -64,7 +64,7 @@ namespace Tgs.GameRecord.AwcService.Core
 
                 if (gameProviderId.HasValue)
                 {
-                    _ = _memoryCache.Set(key, gameProviderId, absoluteExpirationRelativeToNow: _absoluteExpirationRelativeToNow);
+                    _ = _memoryCache.Set(key, gameProviderId);
                 }
             }
             return gameProviderId!.Value;
@@ -76,10 +76,10 @@ namespace Tgs.GameRecord.AwcService.Core
         public GameRoundStatus GetGameRoundStatus(int txStatus, int settleStatus)
             => _utensil.GetGameRoundStatus(txStatus, settleStatus);
 
-        public async ValueTask<PlayerModel?> GetPlayerAsync(string playerCode)
+        public async ValueTask<PlayerInfo?> GetPlayerAsync(string playerCode)
         {
             var key = $"{_gameRecordInfo.GameProviderCode}:{playerCode}";
-            if (!_memoryCache.TryGetValue(key, out PlayerModel? playerModel))
+            if (!_memoryCache.TryGetValue(key, out PlayerInfo? playerModel))
             {
                 playerModel = await _utensil.GetPlayerAsync(playerCode).ConfigureAwait(false);
 

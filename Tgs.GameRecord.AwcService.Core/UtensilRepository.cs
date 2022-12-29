@@ -1,15 +1,15 @@
-﻿using Tgs.GameProviders.QueryServer.Client;
-using Tgs.GameProviders.QueryServer.Models;
+﻿using Tgs.GameCommand.Client;
+using Tgs.GameCommand.Common;
 using Tgs.GameRounds.Common;
 
 namespace Tgs.GameRecord.AwcService.Core
 {
     internal class UtensilRepository : IUtensil
     {
-        private readonly IGameProvidersQueryServerClient _client;
+        private readonly IGameCommandClient _client;
 
         public UtensilRepository(
-            IGameProvidersQueryServerClient client)
+            IGameCommandClient client)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
         }
@@ -46,7 +46,7 @@ namespace Tgs.GameRecord.AwcService.Core
                 _ => GameRoundStatus.Void
             };
 
-        public ValueTask<PlayerModel?> GetPlayerAsync(string playerCode)
+        public ValueTask<PlayerInfo?> GetPlayerAsync(string playerCode)
             => _client.PlayerGetAsync(playerCode);
     }
 }

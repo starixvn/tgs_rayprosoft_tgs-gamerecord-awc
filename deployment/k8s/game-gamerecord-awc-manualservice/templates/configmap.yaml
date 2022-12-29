@@ -15,7 +15,7 @@ data:
         "MongoGlobPatternPrefix": "tgs.gp.gamerecord.database.manual.awc"
       },
       "GameRecord": {
-        "GameProvidersQueryServerBaseUrl": "http://game-gameprovider-queryserver/",
+        "GameCommandClientBaseUrl": "http://game-gamecommand/",
         "GameProvidersBaseUrl": "http://game-gameproviders/",
         "GameInterfaceAwcServiceBaseUrl": "http://game-gameinterface-awc-service:9090/"
       }

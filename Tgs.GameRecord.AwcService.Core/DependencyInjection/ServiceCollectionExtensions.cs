@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using StackExchange.Redis;
+using Tgs.GameCommand.Client;
 using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameProviders.Client;
-using Tgs.GameProviders.QueryServer.Client;
 using Tgs.GameRecord.AwcService.Core;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
             this IServiceCollection services,
             Action<GameRecordInfoOptions, IServiceProvider> gameRecordInfoOptions,
             Action<GameInterfaceAwcServiceClientOptions, IServiceProvider> gameInterfaceAwcServiceClientOptions,
-            Action<GameProvidersQueryServerClientOptions, IServiceProvider> gameProvidersQueryServerClientOptions,
+            Action<GameCommandClientOptions, IServiceProvider> gameCommandClientOptions,
             Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
             Func<IServiceProvider, IDatabase> redisDatabaseResolver
             )
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     Assembly.GetExecutingAssembly(),
                     ServiceLifetime.Transient)
                 .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
-                .AddGameProvidersQueryServerClient(gameProvidersQueryServerClientOptions)
+                .AddGameCommandClient(gameCommandClientOptions)
                 .AddGameProvidersClient(gameProvidersClientOptions)
                 .AddScoped<IGameRecordManualFactory, GameRecordManualFactory>()
                 .AddScoped<IGameRecordScheduleFactory, GameRecordScheduleFactory>()

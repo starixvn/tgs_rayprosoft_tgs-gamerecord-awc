@@ -1,4 +1,4 @@
-﻿using Tgs.GameProviders.QueryServer.Models;
+﻿using Tgs.GameCommand.Common;
 using Tgs.GameRounds.Common;
 
 namespace Tgs.GameRecord.AwcService.Core
@@ -15,6 +15,6 @@ namespace Tgs.GameRecord.AwcService.Core
 
         GameRoundStatus GetGameRoundStatus(int txStatus, int settleStatus);
 
-        ValueTask<PlayerModel?> GetPlayerAsync(string playerCode);
+        ValueTask<PlayerInfo?> GetPlayerAsync(string playerCode);
     }
 }
