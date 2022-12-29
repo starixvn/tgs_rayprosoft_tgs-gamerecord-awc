@@ -34,11 +34,6 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
                     command.TimeFrom,
                     cancellationToken).ConfigureAwait(false);
 
-                _logger.LogInformation("LogOn:{logOn} | Request:{request} | Response:{response}",
-                    DateTime.UtcNow.ToString("O"),
-                    command,
-                    gamePullRecordReply);
-
                 if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())
                 {
                     await _pullRecordCommandService.ExecuteAsync(new GamePullRecordCommand(
@@ -46,11 +41,17 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
                       GameProviderCode: command.GameProviderCode,
                       Records: gamePullRecordReply.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                    timeFromDateTime = DateTimeOffset.ParseExact(
-                        gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).Single().UpdateTime,
-                        @"yyyy-MM-dd\THH:mm:ssK",
-                        null,
-                        styles: System.Globalization.DateTimeStyles.RoundtripKind);
+                    var item = gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First();
+
+                    _logger.LogInformation("gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First()->{item}", item);
+
+                    timeFromDateTime = !string.IsNullOrEmpty(item.UpdateTime)
+                        ? DateTimeOffset.ParseExact(
+                            item.UpdateTime,
+                            @"yyyy-MM-dd\THH:mm:ssK",
+                            null,
+                            styles: System.Globalization.DateTimeStyles.RoundtripKind)
+                        : null;
                 }
                 else
                 {
