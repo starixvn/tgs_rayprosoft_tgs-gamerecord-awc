@@ -46,11 +46,19 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
                       GameProviderCode: command.GameProviderCode,
                       Records: gamePullRecordReply.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                    timeFromDateTime = DateTimeOffset.ParseExact(
-                        gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).Single().UpdateTime,
-                        @"yyyy-MM-dd\THH:mm:ssK",
-                        null,
-                        styles: System.Globalization.DateTimeStyles.RoundtripKind);
+                    try
+                    {
+                        timeFromDateTime = DateTimeOffset.ParseExact(
+                            gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).Single().UpdateTime,
+                            @"yyyy-MM-dd\THH:mm:ssK",
+                            null,
+                            styles: System.Globalization.DateTimeStyles.RoundtripKind);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Items:{items}", gamePullRecordReply.Items);
+                        timeFromDateTime = null;
+                    }
                 }
                 else
                 {
