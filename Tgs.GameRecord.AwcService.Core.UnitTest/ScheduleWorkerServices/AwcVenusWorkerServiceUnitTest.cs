@@ -28,7 +28,8 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
                 GameProviderCode: GameProviderType.AWC_VENUS,
                 GameProviderAgentId: "testAgentId",
                 GameProviderCert: "testCert",
-                TimeFrom: DateTime.UtcNow.AddMinutes(-1));
+                StartTime: DateTime.UtcNow.AddMinutes(-1),
+                EndTime: DateTime.UtcNow);
 
             var gamePullRecordReply = new GameInterfaceAwcServiceGamePullRecordReply();
             _ = fakeGameInterfaceAwcRecordServiceGrpc
@@ -44,6 +45,46 @@ namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
                 fakePullRecordCommandService);
 
             await service.ExecuteAsync(command).ConfigureAwait(false);
+
+            _ = fakeGameInterfaceAwcRecordServiceGrpc
+                .Received(1)
+                .GamePullRecordByAwcVenusAsync(
+                    Arg.Is(command.GameRecordApiUrl),
+                    Arg.Is(command.GameProviderAgentId),
+                    Arg.Is(command.GameProviderCert),
+                    Arg.Any<DateTimeOffset>());
+        }
+
+        [TestMethod]
+        public async Task Start_Time_Greater_Than_End_Time()
+        {
+            var fakeLogger = NullLogger<AwcVenusWorkerService>.Instance;
+            var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
+            var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
+
+            var command = new AwcVenusCommand(
+                GameRecordApiUrl: new("http://localhost/"),
+                GameProviderId: Guid.NewGuid(),
+                GameProviderCode: GameProviderType.AWC_VENUS,
+                GameProviderAgentId: "testAgentId",
+                GameProviderCert: "testCert",
+                StartTime: DateTime.UtcNow.AddSeconds(1),
+                EndTime: DateTime.UtcNow);
+
+            var service = new AwcVenusWorkerService(
+                fakeGameInterfaceAwcRecordServiceGrpc,
+                fakeLogger,
+                fakePullRecordCommandService);
+
+            await service.ExecuteAsync(command).ConfigureAwait(false);
+
+            _ = fakeGameInterfaceAwcRecordServiceGrpc
+                .Received(0)
+                .GamePullRecordByAwcVenusAsync(
+                    Arg.Is(command.GameRecordApiUrl),
+                    Arg.Is(command.GameProviderAgentId),
+                    Arg.Is(command.GameProviderCert),
+                    Arg.Any<DateTimeOffset>());
         }
     }
 }

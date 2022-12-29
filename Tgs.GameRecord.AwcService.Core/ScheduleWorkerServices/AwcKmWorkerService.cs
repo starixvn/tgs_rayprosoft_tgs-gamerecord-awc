@@ -23,15 +23,17 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
 
         public async ValueTask ExecuteAsync(AwcKmCommand command, CancellationToken cancellationToken = default)
         {
-            var timeFromDateTime = (DateTimeOffset?)command.TimeFrom;
+            var timeFromDateTime = (DateTimeOffset?)command.StartTime;
 
-            while (timeFromDateTime is not null)
+            while (timeFromDateTime is not null && command.EndTime.CompareTo(timeFromDateTime.Value) == 1)
             {
+                _logger.LogInformation("TimeFrom:{timeFrom} | CompareTo:{compareTo}", timeFromDateTime.Value, command.EndTime.CompareTo(timeFromDateTime.Value));
+
                 var gamePullRecordReply = await _gameInterfaceAwcRecordServiceGrpc.GamePullRecordByAwcKmAsync(
                     command.GameRecordApiUrl,
                     command.GameProviderAgentId,
                     command.GameProviderCert,
-                    command.TimeFrom,
+                    timeFromDateTime.Value,
                     cancellationToken).ConfigureAwait(false);
 
                 if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())

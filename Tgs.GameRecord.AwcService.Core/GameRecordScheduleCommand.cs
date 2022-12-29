@@ -6,5 +6,6 @@
         string GameProviderCode,
         string GameProviderAgentId,
         string GameProviderCert,
-        DateTimeOffset TimeFrom);
+        DateTimeOffset StartTime,
+        DateTimeOffset EndTime);
 }

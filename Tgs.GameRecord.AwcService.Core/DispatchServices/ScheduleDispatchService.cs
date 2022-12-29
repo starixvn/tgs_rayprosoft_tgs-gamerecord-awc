@@ -29,8 +29,8 @@ namespace Tgs.GameRecord.AwcService.Core.DispatchServices
                 {
                     try
                     {
-                        var nowTime = DateTimeOffset.ParseExact(DateTimeOffset.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
-                        var timeFrom = nowTime.AddMinutes((double)_gameRecordInfoOptions.IntervalMinute * -1);
+                        var endTime = DateTimeOffset.ParseExact(DateTimeOffset.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
+                        var startTime = endTime.AddMinutes((double)_gameRecordInfoOptions.IntervalMinute * -1);
 
                         await _factory.ExecuteAsync(new GameRecordScheduleCommand(
                             GameRecordApiUrl: command.GameRecordApiUrl,
@@ -38,7 +38,8 @@ namespace Tgs.GameRecord.AwcService.Core.DispatchServices
                             GameProviderCode: command.GameProviderCode,
                             GameProviderAgentId: command.GameProviderAgentId,
                             GameProviderCert: command.GameProviderCert,
-                            TimeFrom: timeFrom), cancellationToken: cancellationToken).ConfigureAwait(false);
+                            StartTime: startTime,
+                            EndTime: endTime), cancellationToken: cancellationToken).ConfigureAwait(false);
                     }
                     finally
                     {
