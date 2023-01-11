@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using Tgs.GameRecord.AwcService.Core.DispatchServices;
 
@@ -8,13 +9,15 @@ internal class ScheduleDispatch : IScheduleDispatch
 {
     private readonly IDatabase _database;
     private readonly TimeSpan _expiry;
+    private readonly GameRecordInfoOptions _gameRecordInfoOptions;
 
     public ScheduleDispatch(
-        IDatabase database,
-        TimeSpan expiry)
+        IOptions<GameRecordInfoOptions> options,
+        IDatabase database)
     {
+        _gameRecordInfoOptions = options.Value;
         _database = database ?? throw new ArgumentNullException(nameof(database));
-        _expiry = expiry;
+        _expiry = TimeSpan.FromMinutes(_gameRecordInfoOptions.LockMinute);
     }
 
     public Task<bool> ExistAsync(string key)
