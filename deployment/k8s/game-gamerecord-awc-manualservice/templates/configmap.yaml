@@ -10,14 +10,15 @@ data:
     {
       "GameRecordInfo": {
         "GameProviderCode": "AWC",
-        "IntervalMinute": 3,
-        "MongoDefine": "gp.gamerecord.database.manual",
-        "MongoGlobPatternPrefix": "tgs.gp.gamerecord.database.manual.awc"
+        "IntervalMinutes": 3,
+        "IntervalMinutesMax": 60,
+        "IntervalMinutesMinimum": 1,
+        "LockMinute": 2
       },
       "GameRecord": {
         "GameCommandClientBaseUrl": "http://game-gamecommand/",
         "GameProvidersBaseUrl": "http://game-gameproviders/",
-        "GameInterfaceAwcServiceBaseUrl": "http://game-gameinterface-awc-service:9090/"
+        "GameInterfaceBaseUrl": "http://game-gameinterface-awc-service:9090/"
       }
     }
   monitor.settings.json: |

@@ -1,52 +1,142 @@
-﻿using Tgs.GameCommand.Client;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using Tgs.GameCommand.Client;
 using Tgs.GameCommand.Common;
 using Tgs.GameRounds.Common;
 
-namespace Tgs.GameRecord.AwcService.Core
+namespace Tgs.GameRecord.AwcService.Core;
+
+internal class UtensilRepository : IUtensil
 {
-    internal class UtensilRepository : IUtensil
+    private readonly TimeSpan _absoluteExpirationRelativeToNow;
+    private readonly IGameCommandClient _client;
+    private readonly GameRecordInfoOptions _gameRecordInfo;
+    private readonly IMemoryCache _memoryCache;
+
+    public UtensilRepository(
+        IOptions<GameRecordInfoOptions> options,
+        IGameCommandClient client,
+        IMemoryCache memoryCache,
+        TimeSpan absoluteExpirationRelativeToNow)
     {
-        private readonly IGameCommandClient _client;
+        _gameRecordInfo = options.Value;
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+        _absoluteExpirationRelativeToNow = absoluteExpirationRelativeToNow;
+    }
 
-        public UtensilRepository(
-            IGameCommandClient client)
+    public async ValueTask<Guid?> GetBrandGameProviderConfigurationIdAsync(
+        Guid brandId,
+        Guid gameProviderId,
+        CancellationToken cancellationToken = default)
+    {
+        var key = $"gamerecord:{_gameRecordInfo.GameProviderCode}:{brandId}:{gameProviderId}";
+
+        if (!_memoryCache.TryGetValue(key, out Guid? gameProviderConfigurationId))
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-        }
+            gameProviderConfigurationId = await _client
+                .BrandGetGameProviderConfigurationIdAsync(
+                    brandId: brandId,
+                    gameProviderId: gameProviderId,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
-        public ValueTask<Guid?> BrandGetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
-            => _client.BrandGetGameProviderConfigurationIdAsync(brandId, gameProviderId);
-
-        public async ValueTask<int?> GetGameIdAsync(Guid gameProviderId, string gameExternalId)
-        {
-            var gameModel = await _client.GameGetAsync(gameProviderId, gameExternalId).ConfigureAwait(false);
-            return gameModel?.GameId;
-        }
-
-        public async ValueTask<Guid> GetGameProviderIdAsync(string gameProviderCode)
-        {
-            var gameProviderId = await _client.GameProviderGetGameProviderIdAsync(gameProviderCode).ConfigureAwait(false);
-            return gameProviderId!.Value;
-        }
-
-        public GameRoundClientStatus GetGameRoundClientStatus(GameRoundStatus gameRoundStatus, decimal playerWinLose)
-            => gameRoundStatus switch
+            if (gameProviderConfigurationId.HasValue)
             {
-                GameRoundStatus.Void => GameRoundClientStatus.Void,
-                GameRoundStatus.Closed => (playerWinLose > 0) ? GameRoundClientStatus.Win : GameRoundClientStatus.Loss,
-                _ => GameRoundClientStatus.Open
-            };
+                return _memoryCache
+                    .Set(
+                        key: key,
+                        value: gameProviderConfigurationId,
+                        absoluteExpirationRelativeToNow: _absoluteExpirationRelativeToNow);
+            }
+        }
+        return gameProviderConfigurationId;
+    }
 
-        public GameRoundStatus GetGameRoundStatus(int txStatus, int settleStatus)
-            => txStatus switch
+    public async ValueTask<int?> GetGameIdAsync(
+        Guid gameProviderId,
+        string gameExternalId,
+        CancellationToken cancellationToken = default)
+    {
+        var key = $"gamerecord:{_gameRecordInfo.GameProviderCode}:{gameProviderId}:{gameExternalId}";
+        if (!_memoryCache.TryGetValue(key, out int? gameId))
+        {
+            gameId = await _client
+                .GameGetIdAsync(
+                    gameProviderId: gameProviderId,
+                    gameExternalId: gameExternalId,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            if (gameId.HasValue)
             {
-                0 => GameRoundStatus.Open,
-                2 => GameRoundStatus.Void,
-                1 => (settleStatus is 0 or 1) ? GameRoundStatus.Closed : GameRoundStatus.Void,
-                _ => GameRoundStatus.Void
-            };
+                return _memoryCache
+                    .Set(
+                        key: key,
+                        value: gameId.Value);
+            }
+        }
+        return gameId;
+    }
 
-        public ValueTask<PlayerInfo?> GetPlayerAsync(string playerCode)
-            => _client.PlayerGetAsync(playerCode);
+    public async ValueTask<Guid> GetGameProviderIdAsync(
+        string gameProviderCode,
+        CancellationToken cancellationToken = default)
+    {
+        var key = $"gamerecord:{_gameRecordInfo.GameProviderCode}:{gameProviderCode}";
+        if (!_memoryCache.TryGetValue(key, out Guid gameProviderId))
+        {
+            gameProviderId = await _client
+                .GameProviderGetGameProviderIdAsync(
+                    gameProviderCode: gameProviderCode,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false)
+                ?? throw new Exception($"The identifier for this game provider does not exist.({gameProviderCode})");
+
+            return _memoryCache.Set(key, gameProviderId);
+        }
+        return gameProviderId;
+    }
+
+    public GameRoundClientStatus GetGameRoundClientStatus(GameRoundStatus gameRoundStatus, decimal playerWinLose)
+        => gameRoundStatus switch
+        {
+            GameRoundStatus.Void => GameRoundClientStatus.Void,
+            GameRoundStatus.Closed => (playerWinLose > 0) ? GameRoundClientStatus.Win : GameRoundClientStatus.Loss,
+            _ => GameRoundClientStatus.Open
+        };
+
+    public GameRoundStatus GetGameRoundStatus(int txStatus, int settleStatus)
+        => txStatus switch
+        {
+            0 => GameRoundStatus.Open,
+            2 => GameRoundStatus.Void,
+            1 => (settleStatus is 0 or 1) ? GameRoundStatus.Closed : GameRoundStatus.Void,
+            _ => GameRoundStatus.Void
+        };
+
+    public async ValueTask<PlayerInfo?> GetPlayerAsync(
+        string playerCode,
+        CancellationToken cancellationToken = default)
+    {
+        var key = $"gamerecord:{_gameRecordInfo.GameProviderCode}:{playerCode}";
+        if (!_memoryCache.TryGetValue(key, out PlayerInfo? playerModel))
+        {
+            playerModel = await _client
+                .PlayerGetAsync(
+                    playerCode: playerCode,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            if (playerModel is not null)
+            {
+                return _memoryCache
+                    .Set(
+                        key: key,
+                        value: playerModel,
+                        absoluteExpirationRelativeToNow: _absoluteExpirationRelativeToNow);
+            }
+        }
+        return playerModel;
     }
 }

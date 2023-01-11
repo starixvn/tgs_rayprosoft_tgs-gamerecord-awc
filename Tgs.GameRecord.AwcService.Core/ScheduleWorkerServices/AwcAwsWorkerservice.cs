@@ -3,62 +3,63 @@ using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices
+namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices;
+
+internal class AwcAwsWorkerservice : ICommandService<AwcAwsCommand>
 {
-    internal class AwcAwsWorkerservice : ICommandService<AwcAwsCommand>
+    private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
+    private readonly ILogger<AwcAwsWorkerservice> _logger;
+    private readonly ICommandService<GamePullRecordCommand> _pullRecordCommandService;
+
+    public AwcAwsWorkerservice(
+        IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
+        ILogger<AwcAwsWorkerservice> logger,
+        ICommandService<GamePullRecordCommand> pullRecordCommandService)
     {
-        private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
-        private readonly ILogger<AwcAwsWorkerservice> _logger;
-        private readonly ICommandService<GamePullRecordCommand> _pullRecordCommandService;
+        _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _pullRecordCommandService = pullRecordCommandService ?? throw new ArgumentNullException(nameof(pullRecordCommandService));
+    }
 
-        public AwcAwsWorkerservice(
-            IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
-            ILogger<AwcAwsWorkerservice> logger,
-            ICommandService<GamePullRecordCommand> pullRecordCommandService)
+    public async ValueTask ExecuteAsync(AwcAwsCommand command, CancellationToken cancellationToken = default)
+    {
+        var timeFromDateTime = (DateTimeOffset?)command.StartTime;
+
+        while (timeFromDateTime is not null && command.EndTime.CompareTo(timeFromDateTime.Value) == 1)
         {
-            _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _pullRecordCommandService = pullRecordCommandService ?? throw new ArgumentNullException(nameof(pullRecordCommandService));
-        }
+            _logger.LogInformation("TimeFrom:{timeFrom} | CompareTo:{compareTo}", timeFromDateTime.Value, command.EndTime.CompareTo(timeFromDateTime.Value));
 
-        public async ValueTask ExecuteAsync(AwcAwsCommand command, CancellationToken cancellationToken = default)
-        {
-            var timeFromDateTime = (DateTimeOffset?)command.StartTime;
+            var gamePullRecordReply = await _gameInterfaceAwcRecordServiceGrpc
+                .GamePullRecordByAwcAwsAsync(
+                    apiUrl: command.GameRecordApiUrl,
+                    agentId: command.GameProviderAgentId,
+                    cert: command.GameProviderCert,
+                    time_from: timeFromDateTime.Value,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
-            while (timeFromDateTime is not null && command.EndTime.CompareTo(timeFromDateTime.Value) == 1)
+            if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())
             {
-                _logger.LogInformation("TimeFrom:{timeFrom} | CompareTo:{compareTo}", timeFromDateTime.Value, command.EndTime.CompareTo(timeFromDateTime.Value));
+                await _pullRecordCommandService.ExecuteAsync(new GamePullRecordCommand(
+                  GameProviderId: command.GameProviderId,
+                  GameProviderCode: command.GameProviderCode,
+                  Records: gamePullRecordReply.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                var gamePullRecordReply = await _gameInterfaceAwcRecordServiceGrpc.GamePullRecordByAwcAwsAsync(
-                    command.GameRecordApiUrl,
-                    command.GameProviderAgentId,
-                    command.GameProviderCert,
-                    timeFromDateTime.Value,
-                    cancellationToken).ConfigureAwait(false);
+                var item = gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First();
 
-                if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())
-                {
-                    await _pullRecordCommandService.ExecuteAsync(new GamePullRecordCommand(
-                      GameProviderId: command.GameProviderId,
-                      GameProviderCode: command.GameProviderCode,
-                      Records: gamePullRecordReply.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
+                _logger.LogInformation("gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First()->{item}", item);
 
-                    var item = gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First();
-
-                    _logger.LogInformation("gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First()->{item}", item);
-
-                    timeFromDateTime = !string.IsNullOrEmpty(item.UpdateTime)
-                        ? DateTimeOffset.ParseExact(
-                            item.UpdateTime,
-                            @"yyyy-MM-dd\THH:mm:ssK",
-                            null,
-                            styles: System.Globalization.DateTimeStyles.RoundtripKind)
-                        : null;
-                }
-                else
-                {
-                    timeFromDateTime = null;
-                }
+                timeFromDateTime = !string.IsNullOrEmpty(item.UpdateTime)
+                    ? DateTimeOffset.ParseExact(
+                        item.UpdateTime,
+                        @"yyyy-MM-dd\THH:mm:ssK",
+                        null,
+                        styles: System.Globalization.DateTimeStyles.RoundtripKind)
+                    : null;
+            }
+            else
+            {
+                timeFromDateTime = null;
             }
         }
     }

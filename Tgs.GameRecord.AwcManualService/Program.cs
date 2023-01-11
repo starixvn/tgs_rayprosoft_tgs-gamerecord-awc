@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Net.Mime;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
@@ -30,42 +33,59 @@ builder.Logging
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services
+    .AddRouting(options => options.LowercaseUrls = true)
+    .AddControllers(options =>
+    {
+        options.Filters.Add(new ProducesAttribute(MediaTypeNames.Application.Json));
+        options.Filters.Add(new ConsumesAttribute(MediaTypeNames.Application.Json));
+    })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddMemoryCache();
-
-builder.Services.AddGameRecordAwcService((options, sp) =>
+builder.Services.AddSwaggerGen(c =>
 {
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    options.ConnectionString = configuration.GetConnectionString("Redis")!;
+    var xmlFileNames = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.xml");
+    foreach (var xmlFileName in xmlFileNames) c.IncludeXmlComments(xmlFileName);
 });
 
-builder.Services.AddAwcServiceCore((options, sp) =>
-{
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    configuration.GetSection("GameRecordInfo").Bind(options);
-},
-(options, sp) =>
-{
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceAwcServiceBaseUrl");
-},
-(options, sp) =>
-{
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameCommandClientBaseUrl");
-},
-(options, sp) =>
-{
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameProvidersBaseUrl");
-},
-(sp) => sp.GetRequiredService<RedisConnectionManager>().Database);
+builder.Services.AddAwcServiceCore(
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.ConnectionString = configuration.GetConnectionString("Redis")!;
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        configuration.GetSection("GameRecordInfo").Bind(options);
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        configuration.GetSection("MongoSetting").Bind(options);
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceBaseUrl");
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameCommandClientBaseUrl");
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameProvidersBaseUrl");
+    });
 
-var gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>();
+var mongoSetting = builder.Configuration.GetSection("MongoSetting").Get<MongoSettingOptions>();
+var natsSetting = builder.Configuration.GetSection("NatsSetting").Get<NatsSettingOptions>();
 
 builder.Services
     .AddMessageQueue()
@@ -73,7 +93,7 @@ builder.Services
     {
         _ = config
         .DefineMessageQueue(
-            gameRecordInfo.MongoDefine,
+            mongoSetting.ManagerName,
             sp => new MongoMessageQueueBuilderOptions
             {
                 MessageQueue = MongoMessageQueue.Default,
@@ -88,22 +108,24 @@ builder.Services
              var configuration = sp.GetRequiredService<IConfiguration>();
              options.Url = configuration.GetConnectionString("Nats")!;
          })
-         .AddProcessor<ManualMessageHandler>("gp.gamerecord.manual.awc", "gp.gamerecord.manual");
+         .AddProcessor<ManualMessageHandler>(
+             subject: natsSetting.Subject,
+             queue: natsSetting.Group);
      })
      .ClearAllExchanges()
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.aelotto", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.aelotto")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.aws", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.aws")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.cockfight", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.cockfight")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.facai", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.facai")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.fs", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.fs")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.km", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.km")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.ludo", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.ludo")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.pgs", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.pgs")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.rcb", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.rcb")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.sg", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.sg")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.spade", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.spade")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.venus", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.venus")
-     .AddMongoGlobPatternExchange($"{gameRecordInfo.MongoGlobPatternPrefix}.yl", gameRecordInfo.MongoDefine, $"{gameRecordInfo.MongoGlobPatternPrefix}.yl");
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.aelotto", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.aelotto")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.aws", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.aws")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.cockfight", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.cockfight")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.facai", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.facai")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.fs", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.fs")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.km", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.km")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.ludo", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.ludo")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.pgs", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.pgs")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.rcb", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.rcb")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.sg", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.sg")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.spade", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.spade")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.venus", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.venus")
+     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.yl", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.yl");
 
 builder.Services
      .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
@@ -159,5 +181,7 @@ _ = app.MapControllers();
 app.MapProfileViewer();
 
 app.MapHealthChecks("/healthz");
+
+_ = app.UseGameRecordRegister();
 
 app.Run();

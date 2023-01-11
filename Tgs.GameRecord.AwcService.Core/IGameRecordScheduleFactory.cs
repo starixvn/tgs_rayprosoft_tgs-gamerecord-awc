@@ -1,7 +1,6 @@
-﻿namespace Tgs.GameRecord.AwcService.Core
+﻿namespace Tgs.GameRecord.AwcService.Core;
+
+public interface IGameRecordScheduleFactory
 {
-    public interface IGameRecordScheduleFactory
-    {
-        ValueTask ExecuteAsync(GameRecordScheduleCommand command, CancellationToken cancellationToken = default);
-    }
+    ValueTask ExecuteAsync(GameRecordScheduleCommand command, CancellationToken cancellationToken = default);
 }

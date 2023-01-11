@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameInterface.AwcService.Protos;
@@ -10,80 +9,80 @@ using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices
+namespace Tgs.GameRecord.AwcService.Core.UnitTest.ScheduleWorkerServices;
+
+[TestClass]
+public class AwcLudoWorkerServiceUnitTest
 {
-    [TestClass]
-    public class AwcLudoWorkerServiceUnitTest
+    [TestMethod]
+    public async Task Normal_Process()
     {
-        [TestMethod]
-        public async Task Normal_Process()
-        {
-            var fakeLogger = NullLogger<AwcLudoWorkerService>.Instance;
-            var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
-            var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
+        var fakeLogger = NullLogger<AwcLudoWorkerService>.Instance;
+        var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
+        var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
 
-            var command = new AwcLudoCommand(
-                GameRecordApiUrl: new("http://localhost/"),
-                GameProviderId: Guid.NewGuid(),
-                GameProviderCode: GameProviderType.AWC_LUDO,
-                GameProviderAgentId: "testAgentId",
-                GameProviderCert: "testCert",
-                StartTime: DateTime.UtcNow.AddMinutes(-1),
-                EndTime: DateTime.UtcNow);
+        var command = new AwcLudoCommand(
+            GameRecordApiUrl: new("http://localhost/"),
+            GameProviderId: Guid.NewGuid(),
+            GameProviderCode: GameProviderType.AWC_LUDO,
+            GameProviderAgentId: "testAgentId",
+            GameProviderCert: "testCert",
+            StartTime: DateTime.UtcNow.AddMinutes(-1),
+            EndTime: DateTime.UtcNow);
 
-            var gamePullRecordReply = new GameInterfaceAwcServiceGamePullRecordReply();
-            _ = fakeGameInterfaceAwcRecordServiceGrpc
-                .GamePullRecordByAwcLudoAsync(
-                    Arg.Is(command.GameRecordApiUrl),
-                    Arg.Is(command.GameProviderAgentId),
-                    Arg.Is(command.GameProviderCert),
-                    Arg.Any<DateTimeOffset>()).Returns(gamePullRecordReply);
+        var gamePullRecordReply = new GameInterfaceAwcServiceGamePullRecordReply();
+        _ = fakeGameInterfaceAwcRecordServiceGrpc
+            .GamePullRecordByAwcLudoAsync(
+                Arg.Is(command.GameRecordApiUrl),
+                Arg.Is(command.GameProviderAgentId),
+                Arg.Is(command.GameProviderCert),
+                Arg.Any<DateTimeOffset>()).Returns(gamePullRecordReply);
 
-            var service = new AwcLudoWorkerService(
-                fakeGameInterfaceAwcRecordServiceGrpc,
-                fakeLogger,
-                fakePullRecordCommandService);
+        var service = new AwcLudoWorkerService(
+            fakeGameInterfaceAwcRecordServiceGrpc,
+            fakeLogger,
+            fakePullRecordCommandService);
 
-            await service.ExecuteAsync(command).ConfigureAwait(false);
+        await service.ExecuteAsync(command).ConfigureAwait(false);
 
-            _ = fakeGameInterfaceAwcRecordServiceGrpc
-                .Received(1)
-                .GamePullRecordByAwcLudoAsync(
-                    Arg.Is(command.GameRecordApiUrl),
-                    Arg.Is(command.GameProviderAgentId),
-                    Arg.Is(command.GameProviderCert),
-                    Arg.Any<DateTimeOffset>());
-        }
-        [TestMethod]
-        public async Task Start_Time_Greater_Than_End_Time()
-        {
-            var fakeLogger = NullLogger<AwcLudoWorkerService>.Instance;
-            var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
-            var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
+        _ = fakeGameInterfaceAwcRecordServiceGrpc
+            .Received(1)
+            .GamePullRecordByAwcLudoAsync(
+                Arg.Is(command.GameRecordApiUrl),
+                Arg.Is(command.GameProviderAgentId),
+                Arg.Is(command.GameProviderCert),
+                Arg.Any<DateTimeOffset>());
+    }
 
-            var command = new AwcLudoCommand(
-                GameRecordApiUrl: new("http://localhost/"),
-                GameProviderId: Guid.NewGuid(),
-                GameProviderCode: GameProviderType.AWC_LUDO,
-                GameProviderAgentId: "testAgentId",
-                GameProviderCert: "testCert",
-                StartTime: DateTime.UtcNow.AddSeconds(1),
-                EndTime: DateTime.UtcNow);
+    [TestMethod]
+    public async Task Start_Time_Greater_Than_End_Time()
+    {
+        var fakeLogger = NullLogger<AwcLudoWorkerService>.Instance;
+        var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
+        var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
 
-            var service = new AwcLudoWorkerService(
-                fakeGameInterfaceAwcRecordServiceGrpc,
-                fakeLogger,
-                fakePullRecordCommandService);
+        var command = new AwcLudoCommand(
+            GameRecordApiUrl: new("http://localhost/"),
+            GameProviderId: Guid.NewGuid(),
+            GameProviderCode: GameProviderType.AWC_LUDO,
+            GameProviderAgentId: "testAgentId",
+            GameProviderCert: "testCert",
+            StartTime: DateTime.UtcNow.AddSeconds(1),
+            EndTime: DateTime.UtcNow);
 
-            await service.ExecuteAsync(command).ConfigureAwait(false);
+        var service = new AwcLudoWorkerService(
+            fakeGameInterfaceAwcRecordServiceGrpc,
+            fakeLogger,
+            fakePullRecordCommandService);
 
-            _ = fakeGameInterfaceAwcRecordServiceGrpc
-                .Received(0)
-                .GamePullRecordByAwcLudoAsync(
-                    Arg.Is(command.GameRecordApiUrl),
-                    Arg.Is(command.GameProviderAgentId),
-                    Arg.Is(command.GameProviderCert),
-                    Arg.Any<DateTimeOffset>());
-        }
+        await service.ExecuteAsync(command).ConfigureAwait(false);
+
+        _ = fakeGameInterfaceAwcRecordServiceGrpc
+            .Received(0)
+            .GamePullRecordByAwcLudoAsync(
+                Arg.Is(command.GameRecordApiUrl),
+                Arg.Is(command.GameProviderAgentId),
+                Arg.Is(command.GameProviderCert),
+                Arg.Any<DateTimeOffset>());
     }
 }
