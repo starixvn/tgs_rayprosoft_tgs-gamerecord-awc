@@ -16,7 +16,7 @@ public class AwcCockfightWorkerServiceUnitTest
     [TestMethod]
     public async Task Normal_Process()
     {
-        var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
+        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
         var fakeSettleCommandService = Substitute.For<ICommandService<GameSettleCommand>>();
         var fakeUnsettleCommandService = Substitute.For<ICommandService<GameUnsettleCommand>>();
         var fakeUtensil = Substitute.For<IUtensil>();
@@ -32,16 +32,16 @@ public class AwcCockfightWorkerServiceUnitTest
 
         _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is(GameProviderType.AWC_COCKFIGHT)).Returns(gameProviderId);
 
-        var gameUnsettleReply = new GameInterfaceAwcServiceGameUnsettleRecordReply();
-        _ = fakeGameInterfaceAwcRecordServiceGrpc
+        var gameUnsettleReply = new GameUnsettleRecordReply();
+        _ = fakeClient
             .GameUnsettleByAwcCockfightAsync(
                 Arg.Is(command.GameRecordApiUrl),
                 Arg.Is(command.GameProviderAgentId),
                 Arg.Is(command.GameProviderCert),
                 Arg.Any<DateTimeOffset>()).Returns(gameUnsettleReply);
 
-        var gameSettle = new GameInterfaceAwcServiceGameSettleRecordReply();
-        _ = fakeGameInterfaceAwcRecordServiceGrpc
+        var gameSettle = new GameSettleRecordReply();
+        _ = fakeClient
             .GameSettleByAwcCockfightAsync(
                 Arg.Is(command.GameRecordApiUrl),
                 Arg.Is(command.GameProviderAgentId),
@@ -50,7 +50,7 @@ public class AwcCockfightWorkerServiceUnitTest
                 Arg.Any<DateTimeOffset>()).Returns(gameSettle);
 
         var service = new AwcCockfightWorkerService(
-            fakeGameInterfaceAwcRecordServiceGrpc,
+            fakeClient,
             fakeSettleCommandService,
             fakeUnsettleCommandService,
             fakeUtensil);

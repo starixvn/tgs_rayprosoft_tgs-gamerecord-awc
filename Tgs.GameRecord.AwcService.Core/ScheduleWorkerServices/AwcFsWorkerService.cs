@@ -7,16 +7,16 @@ namespace Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices;
 
 internal class AwcFsWorkerService : ICommandService<AwcFsCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
+    private readonly IGameInterfaceAwcRecordServiceClient _client;
     private readonly ILogger<AwcFsWorkerService> _logger;
     private readonly ICommandService<GamePullRecordCommand> _pullRecordCommandService;
 
     public AwcFsWorkerService(
-        IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
+        IGameInterfaceAwcRecordServiceClient client,
         ILogger<AwcFsWorkerService> logger,
         ICommandService<GamePullRecordCommand> pullRecordCommandService)
     {
-        _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _pullRecordCommandService = pullRecordCommandService ?? throw new ArgumentNullException(nameof(pullRecordCommandService));
     }
@@ -29,7 +29,7 @@ internal class AwcFsWorkerService : ICommandService<AwcFsCommand>
         {
             _logger.LogInformation("TimeFrom:{timeFrom} | CompareTo:{compareTo}", timeFromDateTime.Value, command.EndTime.CompareTo(timeFromDateTime.Value));
 
-            var gamePullRecordReply = await _gameInterfaceAwcRecordServiceGrpc.GamePullRecordByAwcFsAsync(
+            var gamePullRecordReply = await _client.GamePullRecordByAwcFsAsync(
                 command.GameRecordApiUrl,
                 command.GameProviderAgentId,
                 command.GameProviderCert,

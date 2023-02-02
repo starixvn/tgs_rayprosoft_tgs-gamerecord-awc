@@ -7,19 +7,19 @@ namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 
 internal class AwcAelottoWorkerService : ICommandService<AwcAelottoCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
+    private readonly IGameInterfaceAwcRecordServiceClient _client;
 
     private readonly ICommandService<GameSettleCommand> _settleCommandService;
     private readonly ICommandService<GameUnsettleCommand> _unsettleCommandService;
     private readonly IUtensil _utensil;
 
     public AwcAelottoWorkerService(
-        IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
+        IGameInterfaceAwcRecordServiceClient client,
         ICommandService<GameSettleCommand> settleCommandService,
         ICommandService<GameUnsettleCommand> unsettleCommandService,
         IUtensil utensil)
     {
-        _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
         _settleCommandService = settleCommandService ?? throw new ArgumentNullException(nameof(settleCommandService));
         _unsettleCommandService = unsettleCommandService ?? throw new ArgumentNullException(nameof(unsettleCommandService));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
@@ -34,7 +34,7 @@ internal class AwcAelottoWorkerService : ICommandService<AwcAelottoCommand>
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        var gameUnsettle = await _gameInterfaceAwcRecordServiceGrpc
+        var gameUnsettle = await _client
             .GameUnsettleByAwcAeLottoAsync(
                 apiUrl: command.GameRecordApiUrl,
                 agentId: command.GameProviderAgentId,
@@ -52,7 +52,7 @@ internal class AwcAelottoWorkerService : ICommandService<AwcAelottoCommand>
                   Records: gameUnsettle.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        var gameSettle = await _gameInterfaceAwcRecordServiceGrpc
+        var gameSettle = await _client
             .GameSettleByAwcAeLottoAsync(
                 apiUrl: command.GameRecordApiUrl,
                 agentId: command.GameProviderAgentId,

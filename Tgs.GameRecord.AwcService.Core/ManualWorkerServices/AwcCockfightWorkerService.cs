@@ -7,17 +7,17 @@ namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 
 internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
+    private readonly IGameInterfaceAwcRecordServiceClient _client;
     private readonly ICommandService<GameSettleCommand> _settleCommandService;
     private readonly ICommandService<GameUnsettleCommand> _unsettleCommandService;
     private readonly IUtensil _utensil;
 
-    public AwcCockfightWorkerService(IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
+    public AwcCockfightWorkerService(IGameInterfaceAwcRecordServiceClient client,
         ICommandService<GameSettleCommand> settleCommandService,
         ICommandService<GameUnsettleCommand> unsettleCommandService,
         IUtensil utensil)
     {
-        _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
         _settleCommandService = settleCommandService ?? throw new ArgumentNullException(nameof(settleCommandService));
         _unsettleCommandService = unsettleCommandService ?? throw new ArgumentNullException(nameof(unsettleCommandService));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
@@ -32,7 +32,7 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        var gameUnsettle = await _gameInterfaceAwcRecordServiceGrpc
+        var gameUnsettle = await _client
             .GameUnsettleByAwcCockfightAsync(
                 apiUrl: command.GameRecordApiUrl,
                 agentId: command.GameProviderAgentId,
@@ -49,7 +49,7 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
                   Records: gameUnsettle.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        var gameSettle = await _gameInterfaceAwcRecordServiceGrpc
+        var gameSettle = await _client
             .GameSettleByAwcCockfightAsync(
                 apiUrl: command.GameRecordApiUrl,
                 agentId: command.GameProviderAgentId,

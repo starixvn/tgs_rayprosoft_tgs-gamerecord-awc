@@ -16,7 +16,7 @@ public class AwcSpadeWorkerServiceUnitTest
     [TestMethod]
     public async Task Normal_Process()
     {
-        var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
+        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
         var fakeSettleCommandService = Substitute.For<ICommandService<GameSettleCommand>>();
         var fakeUtensil = Substitute.For<IUtensil>();
 
@@ -31,8 +31,8 @@ public class AwcSpadeWorkerServiceUnitTest
 
         _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is(GameProviderType.AWC_SPADE)).Returns(gameProviderId);
 
-        var gameSettle = new GameInterfaceAwcServiceGameSettleRecordReply();
-        _ = fakeGameInterfaceAwcRecordServiceGrpc
+        var gameSettle = new GameSettleRecordReply();
+        _ = fakeClient
             .GameSettleByAwcSpadeAsync(
                 Arg.Is(command.GameRecordApiUrl),
                 Arg.Is(command.GameProviderAgentId),
@@ -41,7 +41,7 @@ public class AwcSpadeWorkerServiceUnitTest
                 Arg.Any<DateTimeOffset>()).Returns(gameSettle);
 
         var service = new AwcSpadeWorkerService(
-            fakeGameInterfaceAwcRecordServiceGrpc,
+            fakeClient,
             fakeSettleCommandService,
             fakeUtensil);
 

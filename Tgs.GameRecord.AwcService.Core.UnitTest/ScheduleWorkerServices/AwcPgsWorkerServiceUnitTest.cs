@@ -18,7 +18,7 @@ public class AwcPgsWorkerServiceUnitTest
     public async Task Normal_Process()
     {
         var fakeLogger = NullLogger<AwcPgsWorkerService>.Instance;
-        var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
+        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
         var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
 
         var command = new AwcPgsCommand(
@@ -30,8 +30,8 @@ public class AwcPgsWorkerServiceUnitTest
             StartTime: DateTime.UtcNow.AddMinutes(-1),
             EndTime: DateTime.UtcNow);
 
-        var gamePullRecordReply = new GameInterfaceAwcServiceGamePullRecordReply();
-        _ = fakeGameInterfaceAwcRecordServiceGrpc
+        var gamePullRecordReply = new GamePullRecordReply();
+        _ = fakeClient
             .GamePullRecordByAwcPgsAsync(
                 Arg.Is(command.GameRecordApiUrl),
                 Arg.Is(command.GameProviderAgentId),
@@ -39,13 +39,13 @@ public class AwcPgsWorkerServiceUnitTest
                 Arg.Any<DateTimeOffset>()).Returns(gamePullRecordReply);
 
         var service = new AwcPgsWorkerService(
-            fakeGameInterfaceAwcRecordServiceGrpc,
+            fakeClient,
             fakeLogger,
             fakePullRecordCommandService);
 
         await service.ExecuteAsync(command).ConfigureAwait(false);
 
-        _ = fakeGameInterfaceAwcRecordServiceGrpc
+        _ = fakeClient
             .Received(1)
             .GamePullRecordByAwcPgsAsync(
                 Arg.Is(command.GameRecordApiUrl),
@@ -58,7 +58,7 @@ public class AwcPgsWorkerServiceUnitTest
     public async Task Start_Time_Greater_Than_End_Time()
     {
         var fakeLogger = NullLogger<AwcPgsWorkerService>.Instance;
-        var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
+        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
         var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
 
         var command = new AwcPgsCommand(
@@ -71,13 +71,13 @@ public class AwcPgsWorkerServiceUnitTest
             EndTime: DateTime.UtcNow);
 
         var service = new AwcPgsWorkerService(
-            fakeGameInterfaceAwcRecordServiceGrpc,
+            fakeClient,
             fakeLogger,
             fakePullRecordCommandService);
 
         await service.ExecuteAsync(command).ConfigureAwait(false);
 
-        _ = fakeGameInterfaceAwcRecordServiceGrpc
+        _ = fakeClient
             .Received(0)
             .GamePullRecordByAwcPgsAsync(
                 Arg.Is(command.GameRecordApiUrl),

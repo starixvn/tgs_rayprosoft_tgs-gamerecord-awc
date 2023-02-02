@@ -2,4 +2,4 @@
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
-public record GameUnsettleCommand(Guid GameProviderId, string GameProviderCode, IEnumerable<GameInterfaceAwcServiceGameUnsettleRecord> Records);
+public record GameUnsettleCommand(Guid GameProviderId, string GameProviderCode, IEnumerable<GameUnsettleRecord> Records);

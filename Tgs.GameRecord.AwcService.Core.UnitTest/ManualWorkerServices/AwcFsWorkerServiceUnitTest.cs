@@ -16,7 +16,7 @@ public class AwcFsWorkerServiceUnitTest
     [TestMethod]
     public async Task Normal_Process()
     {
-        var fakeGameInterfaceAwcRecordServiceGrpc = Substitute.For<IGameInterfaceAwcRecordServiceGrpc>();
+        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
         var fakeSettleCommandService = Substitute.For<ICommandService<GameSettleCommand>>();
         var fakeUtensil = Substitute.For<IUtensil>();
 
@@ -31,8 +31,8 @@ public class AwcFsWorkerServiceUnitTest
 
         _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is(GameProviderType.AWC_FS)).Returns(gameProviderId);
 
-        var gameSettle = new GameInterfaceAwcServiceGameSettleRecordReply();
-        _ = fakeGameInterfaceAwcRecordServiceGrpc
+        var gameSettle = new GameSettleRecordReply();
+        _ = fakeClient
             .GameSettleByAwcFsAsync(
                 Arg.Is(command.GameRecordApiUrl),
                 Arg.Is(command.GameProviderAgentId),
@@ -41,7 +41,7 @@ public class AwcFsWorkerServiceUnitTest
                 Arg.Any<DateTimeOffset>()).Returns(gameSettle);
 
         var service = new AwcFsWorkerService(
-            fakeGameInterfaceAwcRecordServiceGrpc,
+            fakeClient,
             fakeSettleCommandService,
             fakeUtensil);
 

@@ -7,16 +7,16 @@ namespace Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 
 internal class AwcKmWorkerService : ICommandService<AwcKmCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceGrpc _gameInterfaceAwcRecordServiceGrpc;
+    private readonly IGameInterfaceAwcRecordServiceClient _client;
     private readonly ICommandService<GameSettleCommand> _settleCommandService;
     private readonly IUtensil _utensil;
 
     public AwcKmWorkerService(
-        IGameInterfaceAwcRecordServiceGrpc gameInterfaceAwcRecordServiceGrpc,
+        IGameInterfaceAwcRecordServiceClient client,
         ICommandService<GameSettleCommand> settleCommandService,
         IUtensil utensil)
     {
-        _gameInterfaceAwcRecordServiceGrpc = gameInterfaceAwcRecordServiceGrpc ?? throw new ArgumentNullException(nameof(gameInterfaceAwcRecordServiceGrpc));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
         _settleCommandService = settleCommandService ?? throw new ArgumentNullException(nameof(settleCommandService));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
     }
@@ -30,7 +30,7 @@ internal class AwcKmWorkerService : ICommandService<AwcKmCommand>
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        var gameSettle = await _gameInterfaceAwcRecordServiceGrpc
+        var gameSettle = await _client
             .GameSettleByAwcKmAsync(
                 apiUrl: command.GameRecordApiUrl,
                 agentId: command.GameProviderAgentId,

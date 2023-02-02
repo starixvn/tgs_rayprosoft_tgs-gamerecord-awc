@@ -9,10 +9,10 @@
 	<ItemGroup>
 		<PackageReference Include="StackExchange.Redis" Version="2.6.90" />
 		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
-		<PackageReference Include="Tgs.GameCommand.Client" Version="0.0.3" />
-		<PackageReference Include="Tgs.GameInterface.AwcService.Client" Version="0.0.8" />
-		<PackageReference Include="Tgs.GameProviders.Client" Version="0.0.50" />
-		<PackageReference Include="Tgs.GameRounds.Client" Version="0.0.32" />
+		<PackageReference Include="Tgs.GameCommand.Client" Version="0.0.5" />
+		<PackageReference Include="Tgs.GameInterface.AwcService.Client" Version="0.0.9" />
+		<PackageReference Include="Tgs.GameProviders.Client" Version="0.0.52" />
+		<PackageReference Include="Tgs.GameRounds.Client" Version="0.0.34" />
 		<PackageReference Include="Tgs.MessageQueue" Version="2.1.1" />
 		<PackageReference Include="Tgs.MessageQueue.MongoDB" Version="2.1.2" />
 		<PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.7" />
