@@ -8,8 +8,6 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameRecord.AwcManualService;
 using Tgs.GameRecord.AwcService.Core;
-using Tgs.MessageQueue.MongoDB.Configuration;
-using MongoMessageQueue = MongoDB.Messaging.MessageQueue;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,11 +64,6 @@ builder.Services.AddAwcServiceCore(
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        configuration.GetSection("MongoSetting").Bind(options);
-    },
-    (options, sp) =>
-    {
-        var configuration = sp.GetRequiredService<IConfiguration>();
         options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceBaseUrl");
     },
     (options, sp) =>
@@ -84,48 +77,24 @@ builder.Services.AddAwcServiceCore(
         options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameProvidersBaseUrl");
     });
 
-var mongoSetting = builder.Configuration.GetSection("MongoSetting").Get<MongoSettingOptions>();
 var natsSetting = builder.Configuration.GetSection("NatsSetting").Get<NatsSettingOptions>();
 
 builder.Services
     .AddMessageQueue()
-    .AddMongoMessageQueue(config =>
+    .AddNatsMessageQueue(natsConfig =>
     {
-        _ = config
-        .DefineMessageQueue(
-            mongoSetting.ManagerName,
-            sp => new MongoMessageQueueBuilderOptions
-            {
-                MessageQueue = MongoMessageQueue.Default,
-                ConnectionString = sp.GetRequiredService<IConfiguration>().GetConnectionString("MongoMessaging")!
-            });
+        _ = natsConfig
+        .ConfigQueueOptions((options, sp) =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>();
+            options.Url = configuration.GetConnectionString("Nats")!;
+        })
+        .AddProcessor<ManualMessageHandler>(
+            subject: natsSetting.Subject,
+            queue: natsSetting.Group);
     })
-     .AddNatsMessageQueue(natsConfig =>
-     {
-         _ = natsConfig
-         .ConfigQueueOptions((options, sp) =>
-         {
-             var configuration = sp.GetRequiredService<IConfiguration>();
-             options.Url = configuration.GetConnectionString("Nats")!;
-         })
-         .AddProcessor<ManualMessageHandler>(
-             subject: natsSetting.Subject,
-             queue: natsSetting.Group);
-     })
-     .ClearAllExchanges()
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.aelotto", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.aelotto")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.aws", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.aws")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.cockfight", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.cockfight")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.facai", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.facai")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.fs", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.fs")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.km", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.km")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.ludo", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.ludo")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.pgs", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.pgs")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.rcb", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.rcb")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.sg", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.sg")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.spade", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.spade")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.venus", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.venus")
-     .AddMongoGlobPatternExchange($"{mongoSetting.GlobPattern}.yl", mongoSetting.ManagerName, $"{mongoSetting.QueueName}.yl");
+    .ClearAllExchanges()
+    .AddNatsGlobPatternExchange("*");
 
 builder.Services
      .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(

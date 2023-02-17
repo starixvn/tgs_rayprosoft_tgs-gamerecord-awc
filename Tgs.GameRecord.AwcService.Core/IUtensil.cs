@@ -1,5 +1,5 @@
 ﻿using Tgs.GameCommand.Common;
-using Tgs.GameRounds.Common;
+using Tgs.GameRounds.WorkService.Common.Protos;
 
 namespace Tgs.GameRecord.AwcService.Core;
 
@@ -19,9 +19,9 @@ public interface IUtensil
         string gameProviderCode,
         CancellationToken cancellationToken = default);
 
-    GameRoundClientStatus GetGameRoundClientStatus(GameRoundStatus gameRoundStatus, decimal playerWinLose);
+    RoundBiddingClientStatus GetGameRoundClientStatus(RoundBiddingStatus gameRoundStatus, decimal playerWinLose);
 
-    GameRoundStatus GetGameRoundStatus(int txStatus, int settleStatus);
+    RoundBiddingStatus GetGameRoundStatus(int txStatus, int settleStatus);
 
     ValueTask<PlayerInfo?> GetPlayerAsync(
         string playerCode,

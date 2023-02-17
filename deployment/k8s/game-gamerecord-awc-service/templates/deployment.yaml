@@ -47,11 +47,6 @@ spec:
                 secretKeyRef:
                   name: tgs-connections
                   key: nats
-            - name: ConnectionStrings__MongoMessaging
-              valueFrom:
-                secretKeyRef:
-                  name: tgs-connections
-                  key: mongo-gp-scheduler-messaging
             - name: ConnectionStrings__Redis
               valueFrom:
                 secretKeyRef:
