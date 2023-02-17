@@ -1,20 +1,24 @@
 ﻿using System.Text.Json;
-using Tgs.GameRounds.Common;
-using Tgs.GameRounds.Common.MessageModels;
+using Microsoft.Extensions.Logging;
+using Tgs.GameRounds.WorkService.Client;
+using Tgs.GameRounds.WorkService.Common.Protos;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
 {
-    private readonly ICommandService<GameRecordMessage> _service;
+    private readonly ILogger<GameUnsettleCommandService> _logger;
+    private readonly IGameRoundsWorkServiceClient _client;
     private readonly IUtensil _utensil;
 
     public GameUnsettleCommandService(
-        ICommandService<GameRecordMessage> service,
+        ILogger<GameUnsettleCommandService> logger,
+        IGameRoundsWorkServiceClient client,
         IUtensil utensil)
     {
-        _service = service ?? throw new ArgumentNullException(nameof(service));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
     }
 
@@ -22,65 +26,107 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
     {
         foreach (var record in command.Records)
         {
-            bool success = true;
-            var playerModel = await _utensil
-                .GetPlayerAsync(
-                    playerCode: record.UserId,
-                    cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-            var gameId = await _utensil
-                .GetGameIdAsync(
-                    gameProviderId: command.GameProviderId,
-                    gameExternalId: record.GameCode,
-                    cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-            if (playerModel == null || !gameId.HasValue)
+            try
             {
-                success = false;
-            }
-
-            Guid? gameProviderConfigurationId = default;
-            if (playerModel != null)
-            {
-                gameProviderConfigurationId = await _utensil
-                    .GetBrandGameProviderConfigurationIdAsync(
-                        brandId: playerModel.BrandId,
-                        gameProviderId: command.GameProviderId,
+                bool success = true;
+                var playerModel = await _utensil
+                    .GetPlayerAsync(
+                        playerCode: record.UserId,
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                if (!gameProviderConfigurationId.HasValue)
+                var gameId = await _utensil
+                    .GetGameIdAsync(
+                        gameProviderId: command.GameProviderId,
+                        gameExternalId: record.GameCode,
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                if (playerModel == null || !gameId.HasValue)
                 {
                     success = false;
                 }
+
+                Guid? gameProviderConfigurationId = default;
+                if (playerModel != null)
+                {
+                    gameProviderConfigurationId = await _utensil
+                        .GetBrandGameProviderConfigurationIdAsync(
+                            brandId: playerModel.BrandId,
+                            gameProviderId: command.GameProviderId,
+                            cancellationToken: cancellationToken)
+                        .ConfigureAwait(false);
+                    if (!gameProviderConfigurationId.HasValue)
+                    {
+                        success = false;
+                    }
+                }
+
+                var externalCreatedOn = DateTimeOffset.ParseExact(record.BetTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
+
+                var additionalData = new
+                {
+                    record.ExternalRoundId,
+                    record.Platform,
+                    record.PlatformTxId,
+                    record.GameType,
+                    record.GameCode,
+                    record.GameName,
+                    record.RoundId,
+                    record.UserId,
+                    record.Currency,
+                    record.BetTime,
+                    record.BetType,
+                    BetAmount = record.BetAmount.ToDecimal().GetValueOrDefault(0),
+                    RealBetAmount = record.RealBetAmount.ToDecimal().GetValueOrDefault(0),
+                    record.GameInfo
+                };
+
+                if (success)
+                {
+                    await _client
+                    .RoundBidding(
+                        gameProviderId: command.GameProviderId,
+                        gameProviderCode: command.GameProviderCode,
+                        externalRoundId: record.ExternalRoundId,
+                        gameId: gameId!.Value,
+                        externalGameId: record.GameCode,
+                        playerCode: playerModel!.PlayerCode,
+                        walletId: playerModel!.DefaultWalletId,
+                        currencyCode: playerModel!.DefaultWalletCurrencyCode,
+                        brandId: playerModel!.BrandId,
+                        gameProviderConfigurationId: gameProviderConfigurationId!.Value,
+                        status: RoundBiddingStatus.Open,
+                        clientStatus: RoundBiddingClientStatus.Open,
+                        externalCreatedOn: externalCreatedOn,
+                        externalClosedOn: null,
+                        bet: record.BetAmount.ToDecimal().GetValueOrDefault(0),
+                        validBet: record.RealBetAmount.ToDecimal().GetValueOrDefault(0),
+                        settle: 0,
+                        commission: 0,
+                        turnover: record.RealBetAmount.ToDecimal().GetValueOrDefault(0),
+                        playerWinLoss: 0,
+                        additionalData: JsonSerializer.Serialize(additionalData),
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                }
+                else
+                {
+                    await _client
+                    .RoundMissing(
+                        gameProviderId: command.GameProviderId,
+                        gameProviderCode: command.GameProviderCode,
+                        externalRoundId: record.ExternalRoundId,
+                        gameId: gameId ?? -1,
+                        externalGameId: record.GameCode,
+                        playerCode: playerModel?.PlayerCode ?? string.Empty,
+                        data: JsonSerializer.Serialize(additionalData),
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                }
             }
-
-            var externalCreatedOn = DateTimeOffset.ParseExact(record.BetTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
-
-            var gameRoundCommand = new GameRecordMessage(
-                ExternalRoundId: record.ExternalRoundId,
-                GameProviderId: command.GameProviderId,
-                GameProviderCode: command.GameProviderCode,
-                PlayerCode: (playerModel == null) ? string.Empty : playerModel.PlayerCode,
-                GameId: gameId ?? -1,
-                ExternalGameId: record.GameCode,
-                CurrencyCode: (playerModel == null) ? string.Empty : playerModel.DefaultWalletCurrencyCode,
-                Status: GameRoundStatus.Open,
-                GameProviderConfigurationId: gameProviderConfigurationId ?? Guid.Empty,
-                WalletId: (playerModel == null) ? Guid.Empty : playerModel.DefaultWalletId,
-                ExternalCreatedOn: externalCreatedOn,
-                ExternalClosedOn: null,
-                BrandId: (playerModel == null) ? Guid.Empty : playerModel.BrandId,
-                BetAmount: record.BetAmount,
-                ValidBetAmount: record.RealBetAmount,
-                SettleAmount: 0,
-                Commission: 0,
-                Turnover: 0,
-                PlayerWinLoss: 0,
-                AdditionalData: JsonSerializer.Serialize(record),
-                ClientStatus: GameRoundClientStatus.Open,
-                Success: success);
-
-            await _service.ExecuteAsync(gameRoundCommand, cancellationToken).ConfigureAwait(false);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "遊戲未結算處理發生例外.({record})", record);
+            }
         }
     }
 }

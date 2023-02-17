@@ -12,7 +12,6 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         Action<RedisOptions, IServiceProvider> redisDBconfigure,
         Action<GameRecordInfoOptions, IServiceProvider> gameRecordInfoOptions,
-        Action<MongoSettingOptions, IServiceProvider> mongoSettingOptions,
         Action<GameInterfaceAwcServiceClientOptions, IServiceProvider> gameInterfaceAwcServiceClientOptions,
         Action<GameCommandClientOptions, IServiceProvider> gameCommandClientOptions,
         Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions)
@@ -23,9 +22,6 @@ public static class ServiceCollectionExtensions
             .AddOptions<GameRecordInfoOptions>()
             .Configure(gameRecordInfoOptions)
             .Services
-            .AddOptions<MongoSettingOptions>()
-            .Configure(mongoSettingOptions)
-            .Services
             .RegisterAllServiceUtilityTypes(
                 Assembly.GetExecutingAssembly(),
                 ServiceLifetime.Transient)
@@ -34,6 +30,7 @@ public static class ServiceCollectionExtensions
             .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
             .AddGameCommandClient(gameCommandClientOptions)
             .AddGameProvidersClient(gameProvidersClientOptions)
+            .AddGameRoundsWorkServiceClient()
             .AddScoped<IGameRecordManualFactory, GameRecordManualFactory>()
             .AddScoped<IGameRecordScheduleFactory, GameRecordScheduleFactory>()
             .AddTransient<IScheduleDispatch>(sp => ActivatorUtilities.CreateInstance<ScheduleDispatch>(sp, sp.GetRequiredService<RedisConnectionManager>().Database))

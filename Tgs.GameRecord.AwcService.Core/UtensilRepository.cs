@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using Tgs.GameCommand.Client;
 using Tgs.GameCommand.Common;
-using Tgs.GameRounds.Common;
+using Tgs.GameRounds.WorkService.Common.Protos;
 
 namespace Tgs.GameRecord.AwcService.Core;
 
@@ -98,21 +98,21 @@ internal class UtensilRepository : IUtensil
         return gameProviderId;
     }
 
-    public GameRoundClientStatus GetGameRoundClientStatus(GameRoundStatus gameRoundStatus, decimal playerWinLose)
+    public RoundBiddingClientStatus GetGameRoundClientStatus(RoundBiddingStatus gameRoundStatus, decimal playerWinLose)
         => gameRoundStatus switch
         {
-            GameRoundStatus.Void => GameRoundClientStatus.Void,
-            GameRoundStatus.Closed => (playerWinLose > 0) ? GameRoundClientStatus.Win : GameRoundClientStatus.Loss,
-            _ => GameRoundClientStatus.Open
+            RoundBiddingStatus.Void => RoundBiddingClientStatus.Void,
+            RoundBiddingStatus.Closed => (playerWinLose > 0) ? RoundBiddingClientStatus.Win : RoundBiddingClientStatus.Loss,
+            _ => RoundBiddingClientStatus.Open
         };
 
-    public GameRoundStatus GetGameRoundStatus(int txStatus, int settleStatus)
+    public RoundBiddingStatus GetGameRoundStatus(int txStatus, int settleStatus)
         => txStatus switch
         {
-            0 => GameRoundStatus.Open,
-            2 => GameRoundStatus.Void,
-            1 => (settleStatus is 0 or 1) ? GameRoundStatus.Closed : GameRoundStatus.Void,
-            _ => GameRoundStatus.Void
+            0 => RoundBiddingStatus.Open,
+            2 => RoundBiddingStatus.Void,
+            1 => (settleStatus is 0 or 1) ? RoundBiddingStatus.Closed : RoundBiddingStatus.Void,
+            _ => RoundBiddingStatus.Void
         };
 
     public async ValueTask<PlayerInfo?> GetPlayerAsync(
