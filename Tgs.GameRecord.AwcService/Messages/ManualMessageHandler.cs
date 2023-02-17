@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Tgs.GameRecord.AwcService.Core;
 using Tgs.MessageQueue;
-using Tgs.GameRecord.AwcManualService;
 
 namespace Tgs.GameRecord.AwcService.Messages;
 
