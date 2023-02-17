@@ -6,8 +6,8 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.GameRecord.AwcService;
 using Tgs.GameRecord.AwcService.Core;
+using Tgs.GameRecord.AwcService.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,9 +89,8 @@ builder.Services
             var configuration = sp.GetRequiredService<IConfiguration>();
             options.Url = configuration.GetConnectionString("Nats")!;
         })
-        .AddHandler<ScheduleMessageHandler>(
-            subject: natsSetting.Subject,
-            group: natsSetting.Group);
+        .AddHandler<ScheduleMessageHandler>( subject: "gp.gamerecord.schedule.awc", "gp.gamerecord.schedule")
+        .AddProcessor<ManualMessageHandler>( subject: "gp.gamerecord.manual.awc",  queue: "gp.gamerecord.manual");
     })
     .ClearAllExchanges()
     .AddNatsGlobPatternExchange("*");

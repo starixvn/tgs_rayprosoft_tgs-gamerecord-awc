@@ -4,7 +4,7 @@ using Tgs.GameRecord.AwcService.Core.DispatchServices;
 using Tgs.MessageQueue;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameRecord.AwcService;
+namespace Tgs.GameRecord.AwcService.Messages;
 
 internal class ScheduleMessageHandler : IMessageHandler
 {
