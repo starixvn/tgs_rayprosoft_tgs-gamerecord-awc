@@ -71,28 +71,40 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
 
             if (scheduleForm.Source == ScheduleFormSource.Schedule)
             {
-                await _scheduleFactory.ExecuteAsync(
-                    command: new GameRecordScheduleCommand(
-                        GameRecordApiUrl: new Uri(parameter.ApiUrl),
-                        GameProviderId: scheduleForm.GameProviderId.ToGuid(),
-                        GameProviderCode: scheduleForm.GameProviderCode,
-                        GameProviderAgentId: parameter.AgentId,
-                        GameProviderCert: parameter.Cert,
-                        StartTime: parameter.StartTime.ToDateTimeOffset(),
-                        EndTime: parameter.EndTime.ToDateTimeOffset()),
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                var command = new GameRecordScheduleCommand(
+                    GameRecordApiUrl: new Uri(parameter.ApiUrl),
+                    GameProviderId: scheduleForm.GameProviderId.ToGuid(),
+                    GameProviderCode: scheduleForm.GameProviderCode,
+                    GameProviderAgentId: parameter.AgentId,
+                    GameProviderCert: parameter.Cert,
+                    StartTime: parameter.StartTime.ToDateTimeOffset(),
+                    EndTime: parameter.EndTime.ToDateTimeOffset());
+
+                _logger.LogWarning("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
+
+                await _scheduleFactory
+                    .ExecuteAsync(
+                        command: command,
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
             }
             else
             {
-                await _manualFactory.ExecuteAsync(
-                    gameProviderCode: scheduleForm.GameProviderCode,
-                    command: new GameRecordManualCommand(
-                        GameRecordApiUrl: new Uri(parameter.ApiUrl),
-                        GameProviderAgentId: parameter.AgentId,
-                        GameProviderCert: parameter.Cert,
-                        StartTime: parameter.StartTime.ToDateTimeOffset(),
-                        EndTime: parameter.EndTime.ToDateTimeOffset()),
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                var command = new GameRecordManualCommand(
+                    GameRecordApiUrl: new Uri(parameter.ApiUrl),
+                    GameProviderAgentId: parameter.AgentId,
+                    GameProviderCert: parameter.Cert,
+                    StartTime: parameter.StartTime.ToDateTimeOffset(),
+                    EndTime: parameter.EndTime.ToDateTimeOffset());
+
+                _logger.LogWarning("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
+
+                await _manualFactory
+                    .ExecuteAsync(
+                        gameProviderCode: scheduleForm.GameProviderCode,
+                        command: command,
+                        cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
             }
 
             await _clinet
