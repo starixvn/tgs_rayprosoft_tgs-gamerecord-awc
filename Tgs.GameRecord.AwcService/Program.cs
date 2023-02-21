@@ -6,7 +6,6 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.GameRecord.AwcService.Core;
 using Tgs.GameRecord.AwcService.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,20 +63,18 @@ builder.Services.AddAwcServiceCore(
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceBaseUrl");
-    },
-    (options, sp) =>
-    {
-        var configuration = sp.GetRequiredService<IConfiguration>();
         options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameCommandClientBaseUrl");
     },
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameProvidersBaseUrl");
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameRoundsScheduleClinetBaseUrl");
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceClientBaseUrl");
     });
-
-var natsSetting = builder.Configuration.GetSection("NatsSetting").Get<NatsSettingOptions>();
 
 builder.Services
     .AddMessageQueue()
@@ -89,8 +86,9 @@ builder.Services
             var configuration = sp.GetRequiredService<IConfiguration>();
             options.Url = configuration.GetConnectionString("Nats")!;
         })
-        .AddHandler<ScheduleMessageHandler>( subject: "gp.gamerecord.schedule.awc", "gp.gamerecord.schedule")
-        .AddProcessor<ManualMessageHandler>( subject: "gp.gamerecord.manual.awc",  queue: "gp.gamerecord.manual");
+        .AddHandler<ScheduleMessageHandler>(subject: "gp.gamerecord.schedule.awc", "gp.gamerecord.schedule")
+        .AddProcessor<ManualMessageHandler>(subject: "gp.gamerecord.manual.awc", queue: "gp.gamerecord.manual")
+        .AddHandler<ScheduleFormQueuedMessageHandler>(subject: "gp.gamerecord.scheduleform.queued", "gp.gamerecord.scheduleform");
     })
     .ClearAllExchanges()
     .AddNatsGlobPatternExchange("*");
@@ -150,6 +148,6 @@ app.MapProfileViewer();
 
 app.MapHealthChecks("/healthz");
 
-_ = app.UseGameRecordRegister();
+_ = app.UseRegister();
 
 app.Run();

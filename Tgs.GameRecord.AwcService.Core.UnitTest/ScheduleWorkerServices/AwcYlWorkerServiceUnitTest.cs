@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameInterface.AwcService.Protos;
-using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.GameRecord.AwcService.Core.ScheduleWorkerServices;
 using Tgs.ServiceUtility;
@@ -24,7 +23,7 @@ public class AwcYlWorkerServiceUnitTest
         var command = new AwcYlCommand(
             GameRecordApiUrl: new("http://localhost/"),
             GameProviderId: Guid.NewGuid(),
-            GameProviderCode: GameProviderType.AWC_YL,
+            GameProviderCode: "AWC_YL",
             GameProviderAgentId: "testAgentId",
             GameProviderCert: "testCert",
             StartTime: DateTime.UtcNow.AddMinutes(-1),
@@ -64,7 +63,7 @@ public class AwcYlWorkerServiceUnitTest
         var command = new AwcYlCommand(
             GameRecordApiUrl: new("http://localhost/"),
             GameProviderId: Guid.NewGuid(),
-            GameProviderCode: GameProviderType.AWC_YL,
+            GameProviderCode: "AWC_YL",
             GameProviderAgentId: "testAgentId",
             GameProviderCert: "testCert",
             StartTime: DateTime.UtcNow.AddSeconds(1),

@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using Tgs.GameCommand.Client;
 using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameProviders.Client;
 using Tgs.GameRecord.AwcService.Core;
+using Tgs.GameRounds.Schedule.Client;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -12,9 +12,9 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         Action<RedisOptions, IServiceProvider> redisDBconfigure,
         Action<GameRecordInfoOptions, IServiceProvider> gameRecordInfoOptions,
-        Action<GameInterfaceAwcServiceClientOptions, IServiceProvider> gameInterfaceAwcServiceClientOptions,
         Action<GameCommandClientOptions, IServiceProvider> gameCommandClientOptions,
-        Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions)
+        Action<GameRoundsScheduleClinetOptions, IServiceProvider> gameRoundsScheduleClinetOptions,
+        Action<GameInterfaceAwcServiceClientOptions, IServiceProvider> gameInterfaceAwcServiceClientOptions)
         => services
             .AddOptions<RedisOptions>()
             .Configure(redisDBconfigure)
@@ -27,12 +27,14 @@ public static class ServiceCollectionExtensions
                 ServiceLifetime.Transient)
             .AddMemoryCache()
             .AddSingleton<RedisConnectionManager>()
-            .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
             .AddGameCommandClient(gameCommandClientOptions)
-            .AddGameProvidersClient(gameProvidersClientOptions)
+            .AddGameRoundsScheduleClinet(gameRoundsScheduleClinetOptions)
+            .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
             .AddGameRoundsWorkServiceClient()
-            .AddScoped<IGameRecordManualFactory, GameRecordManualFactory>()
-            .AddScoped<IGameRecordScheduleFactory, GameRecordScheduleFactory>()
+            .AddSingleton<IGameRecordManualFactory, GameRecordManualFactory>()
+            .AddSingleton<IGameRecordScheduleFactory, GameRecordScheduleFactory>()
+            .AddSingleton<IScheduleFormDispatcher, ScheduleFormDispatcher>()
+            .AddSingleton<IScheduleFormLock, ScheduleFormLock>()
             .AddTransient<IScheduleDispatch>(sp => ActivatorUtilities.CreateInstance<ScheduleDispatch>(sp, sp.GetRequiredService<RedisConnectionManager>().Database))
             .AddTransient<IUtensil>(sp => ActivatorUtilities.CreateInstance<UtensilRepository>(sp, TimeSpan.FromHours(1)));
 }

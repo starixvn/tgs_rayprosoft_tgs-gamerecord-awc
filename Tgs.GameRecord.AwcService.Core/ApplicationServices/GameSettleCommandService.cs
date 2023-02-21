@@ -8,8 +8,8 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameSettleCommandService : ICommandService<GameSettleCommand>
 {
-    private readonly ILogger<GameSettleCommandService> _logger;
     private readonly IGameRoundsWorkServiceClient _client;
+    private readonly ILogger<GameSettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameSettleCommandService(
