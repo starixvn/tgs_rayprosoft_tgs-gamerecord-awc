@@ -1,6 +1,6 @@
-﻿namespace Tgs.GameRecord.AwcManualService.ViewModels;
+﻿namespace Tgs.GameRecord.AwcService.Messages;
 
-public record GameRecordQueryViewModel(
+public record ManualMessageRequest(
     Uri GameRecordApiUrl,
     string GameProviderCode,
     string GameProviderAgentId,

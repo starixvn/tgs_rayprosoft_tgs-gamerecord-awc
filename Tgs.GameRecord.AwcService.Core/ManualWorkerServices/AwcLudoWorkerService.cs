@@ -1,5 +1,4 @@
 ﻿using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
@@ -23,7 +22,7 @@ internal class AwcLudoWorkerService : ICommandService<AwcLudoCommand>
 
     public async ValueTask ExecuteAsync(AwcLudoCommand command, CancellationToken cancellationToken = default)
     {
-        var gameProviderCode = GameProviderType.AWC_LUDO;
+        var gameProviderCode = "AWC_LUDO";
         var gameProviderId = await _utensil
             .GetGameProviderIdAsync(
                 gameProviderCode: gameProviderCode,

@@ -1,5 +1,4 @@
 ﻿using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
@@ -23,7 +22,7 @@ internal class AwcKmWorkerService : ICommandService<AwcKmCommand>
 
     public async ValueTask ExecuteAsync(AwcKmCommand command, CancellationToken cancellationToken = default)
     {
-        var gameProviderCode = GameProviderType.AWC_KM;
+        var gameProviderCode = "AWC_KM";
         var gameProviderId = await _utensil
             .GetGameProviderIdAsync(
                 gameProviderCode: gameProviderCode,

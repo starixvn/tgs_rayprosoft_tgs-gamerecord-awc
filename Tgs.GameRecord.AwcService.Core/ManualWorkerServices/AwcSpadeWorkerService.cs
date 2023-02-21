@@ -1,5 +1,4 @@
 ﻿using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
@@ -23,7 +22,7 @@ internal class AwcSpadeWorkerService : ICommandService<AwcSpadeCommand>
 
     public async ValueTask ExecuteAsync(AwcSpadeCommand command, CancellationToken cancellationToken = default)
     {
-        var gameProviderCode = GameProviderType.AWC_SPADE;
+        var gameProviderCode = "AWC_SPADE";
         var gameProviderId = await _utensil
             .GetGameProviderIdAsync(
                 gameProviderCode: gameProviderCode,

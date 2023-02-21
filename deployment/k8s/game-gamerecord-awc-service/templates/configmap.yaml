@@ -22,8 +22,8 @@ data:
       },
       "GameRecord": {
         "GameCommandClientBaseUrl": "http://game-gamecommand/",
-        "GameProvidersBaseUrl": "http://game-gameproviders/",
-        "GameInterfaceBaseUrl": "http://game-gameinterface-awc-service:9090/"
+        "GameRoundsScheduleClinetBaseUrl": "http://game-gamerounds-schedule:9090/",
+        "GameInterfaceClientBaseUrl": "http://game-gameinterface-awc-service:9090/"
       }
     }
   monitor.settings.json: |

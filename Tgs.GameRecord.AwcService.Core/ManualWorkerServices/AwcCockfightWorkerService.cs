@@ -1,5 +1,4 @@
 ﻿using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
@@ -25,7 +24,7 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
 
     public async ValueTask ExecuteAsync(AwcCockfightCommand command, CancellationToken cancellationToken = default)
     {
-        var gameProviderCode = GameProviderType.AWC_COCKFIGHT;
+        var gameProviderCode = "AWC_COCKFIGHT";
         var gameProviderId = await _utensil
             .GetGameProviderIdAsync(
                 gameProviderCode: gameProviderCode,

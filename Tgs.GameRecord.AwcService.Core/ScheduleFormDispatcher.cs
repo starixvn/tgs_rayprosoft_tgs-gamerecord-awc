@@ -1,0 +1,126 @@
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Tgs.GameRounds.Schedule.Client;
+using Tgs.GameRounds.Schedule.Common.Protos;
+using Tgs.GameRounds.Schedule.Protos;
+
+namespace Tgs.GameRecord.AwcService.Core;
+
+internal class ScheduleFormDispatcher : IScheduleFormDispatcher
+{
+    private readonly IGameRoundsScheduleClinet _clinet;
+    private readonly ILogger<ScheduleFormDispatcher> _logger;
+    private readonly IGameRecordManualFactory _manualFactory;
+    private readonly IGameRecordScheduleFactory _scheduleFactory;
+    private readonly IScheduleFormLock _scheduleFormLock;
+
+    public ScheduleFormDispatcher(
+        ILogger<ScheduleFormDispatcher> logger,
+        IGameRoundsScheduleClinet clinet,
+        IScheduleFormLock scheduleFormLock,
+        IGameRecordScheduleFactory scheduleFactory,
+        IGameRecordManualFactory manualFactory)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _clinet = clinet ?? throw new ArgumentNullException(nameof(clinet));
+        _scheduleFormLock = scheduleFormLock ?? throw new ArgumentNullException(nameof(scheduleFormLock));
+        _scheduleFactory = scheduleFactory ?? throw new ArgumentNullException(nameof(scheduleFactory));
+        _manualFactory = manualFactory ?? throw new ArgumentNullException(nameof(manualFactory));
+    }
+
+    public async ValueTask ExecuteAsync(
+        string gameProviderCode,
+        long id,
+        CancellationToken cancellationToken = default)
+    {
+        var scheduleForm = await _clinet
+            .ScheduleFormGetAsync(
+                gameProviderCode: gameProviderCode,
+                id: id,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? throw new Exception($"The game provider ({gameProviderCode}) cannot find the schedule form. ({id})");
+
+        if (scheduleForm.State != ScheduleFormState.Queued)
+        {
+            _logger.LogWarning("This game provider ({gameProviderCode}) schedule form status is not queued.({id})", gameProviderCode, id);
+            return;
+        }
+
+        if (!await _scheduleFormLock
+            .LockingAsync(
+                gameProviderCode: gameProviderCode,
+                id: id)
+            .ConfigureAwait(false))
+        {
+            _logger.LogWarning("This game provider ({gameProviderCode}) schedule form has been locked. ({id})", gameProviderCode, id);
+            return;
+        }
+
+        try
+        {
+            await _clinet
+                .ScheduleFormProcessingAsync(
+                    gameProviderCode: gameProviderCode,
+                    id: id,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            var parameter = JsonSerializer.Deserialize<AwcParameter>(scheduleForm.Parameters)
+                ?? throw new Exception($"This game provider ({gameProviderCode}) scheduling form parameter is null. ({id})");
+
+            if (scheduleForm.Source == ScheduleFormSource.Schedule)
+            {
+                await _scheduleFactory.ExecuteAsync(
+                    command: new GameRecordScheduleCommand(
+                        GameRecordApiUrl: new Uri(parameter.ApiUrl),
+                        GameProviderId: scheduleForm.GameProviderId.ToGuid(),
+                        GameProviderCode: scheduleForm.GameProviderCode,
+                        GameProviderAgentId: parameter.AgentId,
+                        GameProviderCert: parameter.Cert,
+                        StartTime: parameter.StartTime.ToDateTimeOffset(),
+                        EndTime: parameter.EndTime.ToDateTimeOffset()),
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await _manualFactory.ExecuteAsync(
+                    gameProviderCode: scheduleForm.GameProviderCode,
+                    command: new GameRecordManualCommand(
+                        GameRecordApiUrl: new Uri(parameter.ApiUrl),
+                        GameProviderAgentId: parameter.AgentId,
+                        GameProviderCert: parameter.Cert,
+                        StartTime: parameter.StartTime.ToDateTimeOffset(),
+                        EndTime: parameter.EndTime.ToDateTimeOffset()),
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+
+            await _clinet
+                .ScheduleFormCompleteAsync(
+                    gameProviderCode: gameProviderCode,
+                    id: id,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception occurred in the game provider ({gameProviderCode}) schedule form. ({id})", gameProviderCode, id);
+
+            await _clinet
+                .ScheduleFormFaileAsync(
+                    gameProviderCode: gameProviderCode,
+                    id: id,
+                    status: ex.Message,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            _ = await _scheduleFormLock
+                 .UnlockAsync(
+                     gameProviderCode: gameProviderCode,
+                     id: id)
+                 .ConfigureAwait(false);
+        }
+    }
+}

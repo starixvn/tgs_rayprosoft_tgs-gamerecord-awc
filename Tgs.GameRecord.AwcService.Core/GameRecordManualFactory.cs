@@ -1,5 +1,4 @@
-﻿using Tgs.GameProviders.Domains;
-using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
+﻿using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core;
@@ -53,88 +52,125 @@ internal class GameRecordManualFactory : IGameRecordManualFactory
     }
 
     public ValueTask ExecuteAsync(string gameProviderCode, GameRecordManualCommand command, CancellationToken cancellationToken = default)
-    {
-        return gameProviderCode switch
+        => gameProviderCode.ToUpper() switch
         {
-            var code when code == GameProviderType.AWC_AELOTTO => _awcAelottoWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_AWS => _awcAwsWorkerservice.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_COCKFIGHT => _awcCockfightWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_FACAI => _awcFacaiWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_FS => _awcFsWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_KM => _awcKmWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_LUDO => _awcLudoWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_PGS => _awcPgsWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_RCB => _awcRcbCommand.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_SG => _awcSgCommand.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_SPADE => _awcSpadeCommand.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_VENUS => _awcVenusWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
-            var code when code == GameProviderType.AWC_YL => _awcYlWorkerService.ExecuteAsync(new(
-                                                                    GameRecordApiUrl: command.GameRecordApiUrl,
-                                                                    GameProviderAgentId: command.GameProviderAgentId,
-                                                                    GameProviderCert: command.GameProviderCert,
-                                                                    StartTime: command.StartTime,
-                                                                    EndTime: command.EndTime), cancellationToken),
+            "AWC_AELOTTO" => _awcAelottoWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_AWS" => _awcAwsWorkerservice
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_COCKFIGHT" => _awcCockfightWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_FACAI" => _awcFacaiWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_FS" => _awcFsWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_KM" => _awcKmWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_LUDO" => _awcLudoWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_PGS" => _awcPgsWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_RCB" => _awcRcbCommand
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_SG" => _awcSgCommand
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_SPADE" => _awcSpadeCommand
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_VENUS" => _awcVenusWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
+            "AWC_YL" => _awcYlWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime,
+                    EndTime: command.EndTime),
+                cancellationToken: cancellationToken),
             _ => throw new NotSupportedException()
         };
-    }
 }

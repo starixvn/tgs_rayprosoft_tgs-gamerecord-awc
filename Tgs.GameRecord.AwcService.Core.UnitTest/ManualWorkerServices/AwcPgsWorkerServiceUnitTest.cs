@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using NSubstitute;
 using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameInterface.AwcService.Protos;
-using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 using Tgs.ServiceUtility;
@@ -29,7 +28,7 @@ public class AwcPgsWorkerServiceUnitTest
 
         var gameProviderId = Guid.NewGuid();
 
-        _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is(GameProviderType.AWC_PGS)).Returns(gameProviderId);
+        _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is("AWC_PGS")).Returns(gameProviderId);
 
         var gameSettle = new GameSettleRecordReply();
         _ = fakeClient

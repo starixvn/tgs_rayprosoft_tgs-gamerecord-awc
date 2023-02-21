@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using NSubstitute;
 using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameInterface.AwcService.Protos;
-using Tgs.GameProviders.Domains;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.GameRecord.AwcService.Core.ManualWorkerServices;
 using Tgs.ServiceUtility;
@@ -30,7 +29,7 @@ public class AwcAelottoWorkerServiceUnitTest
 
         var gameProviderId = Guid.NewGuid();
 
-        _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is(GameProviderType.AWC_AELOTTO)).Returns(gameProviderId);
+        _ = fakeUtensil.GetGameProviderIdAsync(Arg.Is("AWC_AELOTTO")).Returns(gameProviderId);
 
         var gameUnsettleReply = new GameUnsettleRecordReply();
         _ = fakeClient
