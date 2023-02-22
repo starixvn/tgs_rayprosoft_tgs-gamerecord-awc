@@ -8,7 +8,7 @@ namespace Tgs.GameRecord.AwcService.Core;
 
 internal class ScheduleFormDispatcher : IScheduleFormDispatcher
 {
-    private readonly IGameRoundsScheduleClinet _clinet;
+    private readonly IGameRoundsScheduleClient _clinet;
     private readonly ILogger<ScheduleFormDispatcher> _logger;
     private readonly IGameRecordManualFactory _manualFactory;
     private readonly IGameRecordScheduleFactory _scheduleFactory;
@@ -16,7 +16,7 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
 
     public ScheduleFormDispatcher(
         ILogger<ScheduleFormDispatcher> logger,
-        IGameRoundsScheduleClinet clinet,
+        IGameRoundsScheduleClient clinet,
         IScheduleFormLock scheduleFormLock,
         IGameRecordScheduleFactory scheduleFactory,
         IGameRecordManualFactory manualFactory)

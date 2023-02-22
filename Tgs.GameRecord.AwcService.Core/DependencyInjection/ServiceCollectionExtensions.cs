@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
         Action<RedisOptions, IServiceProvider> redisDBconfigure,
         Action<GameRecordInfoOptions, IServiceProvider> gameRecordInfoOptions,
         Action<GameCommandClientOptions, IServiceProvider> gameCommandClientOptions,
-        Action<GameRoundsScheduleClinetOptions, IServiceProvider> gameRoundsScheduleClinetOptions,
+        Action<GameRoundsScheduleClientOptions, IServiceProvider> gameRoundsScheduleClientOptions,
         Action<GameInterfaceAwcServiceClientOptions, IServiceProvider> gameInterfaceAwcServiceClientOptions)
         => services
             .AddOptions<RedisOptions>()
@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
             .AddMemoryCache()
             .AddSingleton<RedisConnectionManager>()
             .AddGameCommandClient(gameCommandClientOptions)
-            .AddGameRoundsScheduleClinet(gameRoundsScheduleClinetOptions)
+            .AddGameRoundsScheduleClient(gameRoundsScheduleClientOptions)
             .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
             .AddGameRoundsWorkServiceClient()
             .AddSingleton<IGameRecordManualFactory, GameRecordManualFactory>()

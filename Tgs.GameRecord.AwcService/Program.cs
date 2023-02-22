@@ -21,9 +21,9 @@ builder.Logging
         options.ParseStateValues = true;
         _ = options.AddFluentdForwardExporter(fluentOptions =>
         {
-            var nodeIp = builder.Configuration.GetValue<string>("NODE_IP");
+            var nodeIp = builder.Configuration.GetValue<string>("NODE_IP")!;
             fluentOptions.Host = nodeIp;
-            fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME");
+            fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME")!;
             fluentOptions.UseMessagePack();
         });
     });
@@ -63,17 +63,17 @@ builder.Services.AddAwcServiceCore(
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameCommandClientBaseUrl");
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameCommandClientBaseUrl")!;
     },
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameRoundsScheduleClinetBaseUrl");
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameRoundsScheduleClientBaseUrl")!;
     },
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceClientBaseUrl");
+        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceClientBaseUrl")!;
     });
 
 builder.Services
@@ -112,6 +112,7 @@ builder.Services
         .AddSource("Tgs.*")
         .AddSource("TGS.*")
         .AddGrpcClientInstrumentation()
+        .AddGrpcCoreInstrumentation()
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
         .AddProfileViewExporter()
