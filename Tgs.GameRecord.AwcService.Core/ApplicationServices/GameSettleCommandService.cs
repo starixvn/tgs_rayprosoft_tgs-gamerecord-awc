@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Tgs.GameRounds.WorkService.Client;
+using Tgs.GameRounds.ManualWork.Client;
 using Tgs.GameRounds.WorkService.Common.Protos;
 using Tgs.ServiceUtility;
 
@@ -8,13 +8,13 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameSettleCommandService : ICommandService<GameSettleCommand>
 {
-    private readonly IGameRoundsWorkServiceClient _client;
+    private readonly IGameRoundsManualWorkClient _client;
     private readonly ILogger<GameSettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameSettleCommandService(
         ILogger<GameSettleCommandService> logger,
-        IGameRoundsWorkServiceClient client,
+        IGameRoundsManualWorkClient client,
         IUtensil utensil)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -119,8 +119,8 @@ internal class GameSettleCommandService : ICommandService<GameSettleCommand>
                         currencyCode: playerModel!.DefaultWalletCurrencyCode,
                         brandId: playerModel!.BrandId,
                         gameProviderConfigurationId: gameProviderConfigurationId!.Value,
-                        status: status,
-                        clientStatus: clientStatus,
+                        status: (GameRounds.ManualWork.Common.Protos.RoundBiddingStatus)status,
+                        clientStatus: (GameRounds.ManualWork.Common.Protos.RoundBiddingClientStatus)clientStatus,
                         externalCreatedOn: externalCreatedOn,
                         externalClosedOn: externalClosedOn,
                         bet: betAmount,

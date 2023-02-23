@@ -1,20 +1,20 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Tgs.GameRounds.WorkService.Client;
-using Tgs.GameRounds.WorkService.Common.Protos;
+using Tgs.GameRounds.ManualWork.Client;
+using Tgs.GameRounds.ManualWork.Common.Protos;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
 {
-    private readonly IGameRoundsWorkServiceClient _client;
+    private readonly IGameRoundsManualWorkClient _client;
     private readonly ILogger<GameUnsettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameUnsettleCommandService(
         ILogger<GameUnsettleCommandService> logger,
-        IGameRoundsWorkServiceClient client,
+        IGameRoundsManualWorkClient client,
         IUtensil utensil)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

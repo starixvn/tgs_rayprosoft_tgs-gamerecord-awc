@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
             .AddGameRoundsScheduleClient(gameRoundsScheduleClientOptions)
             .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
             .AddGameRoundsWorkServiceClient()
+            .AddGameRoundsManualWorkClient()
             .AddSingleton<IGameRecordManualFactory, GameRecordManualFactory>()
             .AddSingleton<IGameRecordScheduleFactory, GameRecordScheduleFactory>()
             .AddSingleton<IScheduleFormDispatcher, ScheduleFormDispatcher>()
