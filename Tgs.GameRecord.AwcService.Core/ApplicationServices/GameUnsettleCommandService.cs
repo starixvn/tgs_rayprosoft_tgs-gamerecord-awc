@@ -2,23 +2,27 @@
 using Microsoft.Extensions.Logging;
 using Tgs.GameRounds.ManualWork.Client;
 using Tgs.GameRounds.ManualWork.Common.Protos;
+using Tgs.GameRounds.WorkService.Client;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
 {
-    private readonly IGameRoundsManualWorkClient _client;
+    private readonly IGameRoundsManualWorkClient _gameRoundsManualWorkClient;
+    private readonly IGameRoundsWorkServiceClient _gameRoundsWorkServiceClient;
     private readonly ILogger<GameUnsettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameUnsettleCommandService(
         ILogger<GameUnsettleCommandService> logger,
-        IGameRoundsManualWorkClient client,
+        IGameRoundsManualWorkClient gameRoundsManualWorkClient,
+        IGameRoundsWorkServiceClient gameRoundsWorkServiceClient,
         IUtensil utensil)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _gameRoundsManualWorkClient = gameRoundsManualWorkClient ?? throw new ArgumentNullException(nameof(gameRoundsManualWorkClient));
+        _gameRoundsWorkServiceClient = gameRoundsWorkServiceClient ?? throw new ArgumentNullException(nameof(gameRoundsWorkServiceClient));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
     }
 
@@ -82,8 +86,8 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
 
                 if (success)
                 {
-                    await _client
-                    .RoundBidding(
+                    await _gameRoundsManualWorkClient
+                    .RapidCheckingAsync(
                         gameProviderId: command.GameProviderId,
                         gameProviderCode: command.GameProviderCode,
                         externalRoundId: record.ExternalRoundId,
@@ -110,7 +114,7 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                 }
                 else
                 {
-                    await _client
+                    await _gameRoundsWorkServiceClient
                     .RoundMissing(
                         gameProviderId: command.GameProviderId,
                         gameProviderCode: command.GameProviderCode,
