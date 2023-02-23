@@ -53,7 +53,10 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
                 id: id)
             .ConfigureAwait(false))
         {
-            _logger.LogWarning("This game provider ({gameProviderCode}) schedule form has been locked. ({id})", gameProviderCode, id);
+            _logger.LogWarning("LogOn:{logOn} Message:This game provider ({gameProviderCode}) schedule form has been locked. ({id})",
+                DateTime.Now.ToString("o"),
+                gameProviderCode,
+                id);
             return;
         }
 
@@ -80,7 +83,7 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
                     StartTime: parameter.StartTime.ToDateTimeOffset(),
                     EndTime: parameter.EndTime.ToDateTimeOffset());
 
-                _logger.LogWarning("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
+                _logger.LogInformation("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
 
                 await _scheduleFactory
                     .ExecuteAsync(
