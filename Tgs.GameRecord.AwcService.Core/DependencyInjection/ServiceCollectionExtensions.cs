@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
             .AddGameCommandClient(gameCommandClientOptions)
             .AddGameRoundsScheduleClient(gameRoundsScheduleClientOptions)
             .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
-            .AddGameRoundsWorkServiceClient()
+            .AddGameRoundsWorkClient()
             .AddGameRoundsManualWorkClient()
             .AddSingleton<IGameRecordManualFactory, GameRecordManualFactory>()
             .AddSingleton<IGameRecordScheduleFactory, GameRecordScheduleFactory>()

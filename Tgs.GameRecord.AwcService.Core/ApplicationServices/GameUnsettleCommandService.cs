@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Tgs.GameRounds.ManualWork.Client;
 using Tgs.GameRounds.ManualWork.Common.Protos;
-using Tgs.GameRounds.WorkService.Client;
+using Tgs.GameRounds.Work.Client;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
@@ -10,14 +10,14 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
 {
     private readonly IGameRoundsManualWorkClient _gameRoundsManualWorkClient;
-    private readonly IGameRoundsWorkServiceClient _gameRoundsWorkServiceClient;
+    private readonly IGameRoundsWorkClient _gameRoundsWorkServiceClient;
     private readonly ILogger<GameUnsettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameUnsettleCommandService(
         ILogger<GameUnsettleCommandService> logger,
         IGameRoundsManualWorkClient gameRoundsManualWorkClient,
-        IGameRoundsWorkServiceClient gameRoundsWorkServiceClient,
+        IGameRoundsWorkClient gameRoundsWorkServiceClient,
         IUtensil utensil)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

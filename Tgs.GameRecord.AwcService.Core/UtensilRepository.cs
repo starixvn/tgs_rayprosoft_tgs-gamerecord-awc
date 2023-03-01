@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using Tgs.GameCommand.Client;
 using Tgs.GameCommand.Common;
-using Tgs.GameRounds.WorkService.Common.Protos;
+using Tgs.GameRounds.Work.Common.Protos;
 
 namespace Tgs.GameRecord.AwcService.Core;
 

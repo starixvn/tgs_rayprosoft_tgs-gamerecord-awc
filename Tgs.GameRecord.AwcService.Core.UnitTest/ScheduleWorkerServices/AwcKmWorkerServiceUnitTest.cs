@@ -23,7 +23,7 @@ public class AwcKmWorkerServiceUnitTest
         var command = new AwcKmCommand(
             GameRecordApiUrl: new("http://localhost/"),
             GameProviderId: Guid.NewGuid(),
-            GameProviderCode:"AWC_KM",
+            GameProviderCode: "AWC_KM",
             GameProviderAgentId: "testAgentId",
             GameProviderCert: "testCert",
             StartTime: DateTime.UtcNow.AddMinutes(-1),
@@ -63,7 +63,7 @@ public class AwcKmWorkerServiceUnitTest
         var command = new AwcKmCommand(
             GameRecordApiUrl: new("http://localhost/"),
             GameProviderId: Guid.NewGuid(),
-            GameProviderCode:"AWC_KM",
+            GameProviderCode: "AWC_KM",
             GameProviderAgentId: "testAgentId",
             GameProviderCert: "testCert",
             StartTime: DateTime.UtcNow.AddSeconds(1),
