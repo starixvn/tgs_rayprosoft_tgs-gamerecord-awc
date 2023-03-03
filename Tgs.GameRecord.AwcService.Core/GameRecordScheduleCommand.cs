@@ -6,5 +6,4 @@ public record GameRecordScheduleCommand(
     string GameProviderCode,
     string GameProviderAgentId,
     string GameProviderCert,
-    DateTimeOffset StartTime,
-    DateTimeOffset EndTime);
+    DateTimeOffset StartTime);

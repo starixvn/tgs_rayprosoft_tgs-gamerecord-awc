@@ -26,8 +26,7 @@ public class AwcPgsWorkerServiceUnitTest
             GameProviderCode: "AWC_PGS",
             GameProviderAgentId: "testAgentId",
             GameProviderCert: "testCert",
-            StartTime: DateTime.UtcNow.AddMinutes(-1),
-            EndTime: DateTime.UtcNow);
+            StartTime: DateTime.UtcNow.AddMinutes(-1));
 
         var gamePullRecordReply = new GamePullRecordReply();
         _ = fakeClient
@@ -46,38 +45,6 @@ public class AwcPgsWorkerServiceUnitTest
 
         _ = fakeClient
             .Received(1)
-            .GamePullRecordByAwcPgsAsync(
-                Arg.Is(command.GameRecordApiUrl),
-                Arg.Is(command.GameProviderAgentId),
-                Arg.Is(command.GameProviderCert),
-                Arg.Any<DateTimeOffset>());
-    }
-
-    [TestMethod]
-    public async Task Start_Time_Greater_Than_End_Time()
-    {
-        var fakeLogger = NullLogger<AwcPgsWorkerService>.Instance;
-        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
-        var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
-
-        var command = new AwcPgsCommand(
-            GameRecordApiUrl: new("http://localhost/"),
-            GameProviderId: Guid.NewGuid(),
-            GameProviderCode: "AWC_PGS",
-            GameProviderAgentId: "testAgentId",
-            GameProviderCert: "testCert",
-            StartTime: DateTime.UtcNow.AddSeconds(1),
-            EndTime: DateTime.UtcNow);
-
-        var service = new AwcPgsWorkerService(
-            fakeClient,
-            fakeLogger,
-            fakePullRecordCommandService);
-
-        await service.ExecuteAsync(command).ConfigureAwait(false);
-
-        _ = fakeClient
-            .Received(0)
             .GamePullRecordByAwcPgsAsync(
                 Arg.Is(command.GameRecordApiUrl),
                 Arg.Is(command.GameProviderAgentId),

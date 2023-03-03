@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Tgs.GameInterface.AwcService.Client;
+using Tgs.GameInterface.AwcService.Protos;
 using Tgs.GameRecord.AwcService.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
@@ -23,42 +24,38 @@ internal class AwcKmWorkerService : ICommandService<AwcKmCommand>
 
     public async ValueTask ExecuteAsync(AwcKmCommand command, CancellationToken cancellationToken = default)
     {
-        var timeFromDateTime = (DateTimeOffset?)command.StartTime;
+        var gamePullRecordReply = await _client
+            .GamePullRecordByAwcKmAsync(
+                apiUrl: command.GameRecordApiUrl,
+                agentId: command.GameProviderAgentId,
+                cert: command.GameProviderCert,
+                time_from: command.StartTime,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
-        while (timeFromDateTime is not null && command.EndTime.CompareTo(timeFromDateTime.Value) == 1)
+        if (gamePullRecordReply is null)
         {
-            _logger.LogInformation("TimeFrom:{timeFrom} | CompareTo:{compareTo}", timeFromDateTime.Value, command.EndTime.CompareTo(timeFromDateTime.Value));
-
-            var gamePullRecordReply = await _client.GamePullRecordByAwcKmAsync(
-                command.GameRecordApiUrl,
-                command.GameProviderAgentId,
-                command.GameProviderCert,
-                timeFromDateTime.Value,
-                cancellationToken).ConfigureAwait(false);
-
-            if (gamePullRecordReply.Items is not null && gamePullRecordReply.Items.Any())
-            {
-                await _pullRecordCommandService.ExecuteAsync(new GamePullRecordCommand(
-                  GameProviderId: command.GameProviderId,
-                  GameProviderCode: command.GameProviderCode,
-                  Records: gamePullRecordReply.Items), cancellationToken: cancellationToken).ConfigureAwait(false);
-
-                var item = gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First();
-
-                _logger.LogInformation("gamePullRecordReply.Items.OrderByDescending(x => x.UpdateTime).First()->{item}", item);
-
-                timeFromDateTime = !string.IsNullOrEmpty(item.UpdateTime)
-                    ? DateTimeOffset.ParseExact(
-                        item.UpdateTime,
-                        @"yyyy-MM-dd\THH:mm:ssK",
-                        null,
-                        styles: System.Globalization.DateTimeStyles.RoundtripKind)
-                    : null;
-            }
-            else
-            {
-                timeFromDateTime = null;
-            }
+            _logger.LogError("LogOn:{logOn} Message: This Reply is null.({command})", DateTime.Now.ToString("o"), command);
+            return;
         }
+
+        var records = gamePullRecordReply.Items ?? Enumerable.Empty<GamePullRecord>();
+
+        if (!records.Any())
+        {
+            _logger.LogInformation("LogOn:{logOn} Message: The records are empty.({command})", DateTime.Now.ToString("o"), command);
+            return;
+        }
+
+        var recordCommand = new GamePullRecordCommand(
+             GameProviderId: command.GameProviderId,
+             GameProviderCode: command.GameProviderCode,
+             Records: records);
+
+        await _pullRecordCommandService
+            .ExecuteAsync(
+                command: recordCommand,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 }

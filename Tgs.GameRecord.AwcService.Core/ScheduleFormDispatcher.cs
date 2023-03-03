@@ -80,8 +80,7 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
                     GameProviderCode: scheduleForm.GameProviderCode,
                     GameProviderAgentId: parameter.AgentId,
                     GameProviderCert: parameter.Cert,
-                    StartTime: parameter.StartTime.ToDateTimeOffset(),
-                    EndTime: parameter.EndTime.ToDateTimeOffset());
+                    StartTime: parameter.StartTime.ToDateTimeOffset());
 
                 _logger.LogInformation("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
 

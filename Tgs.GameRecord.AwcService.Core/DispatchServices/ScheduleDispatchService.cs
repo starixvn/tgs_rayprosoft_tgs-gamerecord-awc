@@ -38,8 +38,7 @@ internal class ScheduleDispatchService : ICommandService<ScheduleDispatchCommand
                         GameProviderCode: command.GameProviderCode,
                         GameProviderAgentId: command.GameProviderAgentId,
                         GameProviderCert: command.GameProviderCert,
-                        StartTime: startTime,
-                        EndTime: endTime), cancellationToken: cancellationToken).ConfigureAwait(false);
+                        StartTime: startTime), cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
                 finally
                 {

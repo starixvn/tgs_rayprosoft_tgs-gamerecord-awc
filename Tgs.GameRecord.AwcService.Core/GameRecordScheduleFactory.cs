@@ -62,8 +62,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_AWS" => _awcAwsWorkerservice
             .ExecuteAsync(
@@ -73,8 +72,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_COCKFIGHT" => _awcCockfightWorkerService
             .ExecuteAsync(
@@ -84,8 +82,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_FACAI" => _awcFacaiWorkerService
             .ExecuteAsync(
@@ -95,8 +92,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_FS" => _awcFsWorkerService
             .ExecuteAsync(
@@ -106,8 +102,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_KM" => _awcKmWorkerService
             .ExecuteAsync(
@@ -117,8 +112,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_LUDO" => _awcLudoWorkerService
             .ExecuteAsync(
@@ -128,8 +122,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_PGS" => _awcPgsWorkerService
             .ExecuteAsync(
@@ -139,8 +132,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_RCB" => _awcRcbCommand
             .ExecuteAsync(
@@ -150,8 +142,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_SG" => _awcSgCommand
             .ExecuteAsync(
@@ -161,8 +152,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_SPADE" => _awcSpadeCommand
             .ExecuteAsync(
@@ -172,8 +162,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_VENUS" => _awcVenusWorkerService
             .ExecuteAsync(
@@ -183,8 +172,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             "AWC_YL" => _awcYlWorkerService
             .ExecuteAsync(
@@ -194,8 +182,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     GameProviderCode: command.GameProviderCode,
                     GameProviderAgentId: command.GameProviderAgentId,
                     GameProviderCert: command.GameProviderCert,
-                    StartTime: command.StartTime,
-                    EndTime: command.EndTime),
+                    StartTime: command.StartTime),
                 cancellationToken),
             _ => throw new NotSupportedException()
         };
