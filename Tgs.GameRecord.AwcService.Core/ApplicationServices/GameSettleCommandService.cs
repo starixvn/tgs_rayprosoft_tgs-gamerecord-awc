@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Tgs.GameRounds.ManualWork.Client;
 using Tgs.GameRounds.Work.Client;
 using Tgs.GameRounds.Work.Common.Protos;
 using Tgs.ServiceUtility;
@@ -9,19 +8,19 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameSettleCommandService : ICommandService<GameSettleCommand>
 {
-    private readonly IGameRoundsManualWorkClient _gameRoundsManualWorkClient;
+    private readonly IGameRoundsWorkManualClient _gameRoundsWorkManualClient;
     private readonly IGameRoundsWorkClient _gameRoundsWorkServiceClient;
     private readonly ILogger<GameSettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameSettleCommandService(
         ILogger<GameSettleCommandService> logger,
-        IGameRoundsManualWorkClient gameRoundsManualWorkClient,
+        IGameRoundsWorkManualClient gameRoundsWorkManualClient,
         IGameRoundsWorkClient gameRoundsWorkServiceClient,
         IUtensil utensil)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _gameRoundsManualWorkClient = gameRoundsManualWorkClient ?? throw new ArgumentNullException(nameof(gameRoundsManualWorkClient));
+        _gameRoundsWorkManualClient = gameRoundsWorkManualClient ?? throw new ArgumentNullException(nameof(gameRoundsWorkManualClient));
         _gameRoundsWorkServiceClient = gameRoundsWorkServiceClient ?? throw new ArgumentNullException(nameof(gameRoundsWorkServiceClient));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
     }
@@ -111,8 +110,8 @@ internal class GameSettleCommandService : ICommandService<GameSettleCommand>
 
                 if (success)
                 {
-                    await _gameRoundsManualWorkClient
-                    .RapidCheckingAsync(
+                    await _gameRoundsWorkManualClient
+                    .RoundBidding(
                         gameProviderId: command.GameProviderId,
                         gameProviderCode: command.GameProviderCode,
                         externalRoundId: record.ExternalRoundId,
@@ -123,8 +122,8 @@ internal class GameSettleCommandService : ICommandService<GameSettleCommand>
                         currencyCode: playerModel!.DefaultWalletCurrencyCode,
                         brandId: playerModel!.BrandId,
                         gameProviderConfigurationId: gameProviderConfigurationId!.Value,
-                        status: (GameRounds.ManualWork.Common.Protos.RoundBiddingStatus)status,
-                        clientStatus: (GameRounds.ManualWork.Common.Protos.RoundBiddingClientStatus)clientStatus,
+                        status: (GameRounds.Work.Manual.Common.Protos.RoundStatus)status,
+                        clientStatus: (GameRounds.Work.Manual.Common.Protos.RoundClientStatus)clientStatus,
                         externalCreatedOn: externalCreatedOn,
                         externalClosedOn: externalClosedOn,
                         bet: betAmount,
