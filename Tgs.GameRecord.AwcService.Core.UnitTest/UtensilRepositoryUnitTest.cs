@@ -17,11 +17,7 @@ public class UtensilRepositoryUnitTest
     {
         var gameRecordInfo = Options.Create(new GameRecordInfoOptions
         {
-            GameProviderCode = "AWC",
-            IntervalMinutes = 3,
-            IntervalMinutesMax = 60,
-            IntervalMinutesMinimum = 1,
-            LockMinute = 1
+            GameProviderCode = "AWC"
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();
@@ -74,11 +70,7 @@ public class UtensilRepositoryUnitTest
     {
         var gameRecordInfo = Options.Create(new GameRecordInfoOptions
         {
-            GameProviderCode = "AWC",
-            IntervalMinutes = 3,
-            IntervalMinutesMax = 60,
-            IntervalMinutesMinimum = 1,
-            LockMinute = 1
+            GameProviderCode = "AWC"
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();
@@ -131,11 +123,7 @@ public class UtensilRepositoryUnitTest
     {
         var gameRecordInfo = Options.Create(new GameRecordInfoOptions
         {
-            GameProviderCode = "AWC",
-            IntervalMinutes = 3,
-            IntervalMinutesMax = 60,
-            IntervalMinutesMinimum = 1,
-            LockMinute = 1
+            GameProviderCode = "AWC"
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();
@@ -184,11 +172,7 @@ public class UtensilRepositoryUnitTest
     {
         var gameRecordInfo = Options.Create(new GameRecordInfoOptions
         {
-            GameProviderCode = "AWC",
-            IntervalMinutes = 3,
-            IntervalMinutesMax = 60,
-            IntervalMinutesMinimum = 1,
-            LockMinute = 1
+            GameProviderCode = "AWC"
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();
@@ -227,11 +211,7 @@ public class UtensilRepositoryUnitTest
     {
         var gameRecordInfo = Options.Create(new GameRecordInfoOptions
         {
-            GameProviderCode = "AWC",
-            IntervalMinutes = 3,
-            IntervalMinutesMax = 60,
-            IntervalMinutesMinimum = 1,
-            LockMinute = 1
+            GameProviderCode = "AWC"
         });
         var fakeClient = Substitute.For<IGameCommandClient>();
         var fakeMemoryCache = Substitute.For<IMemoryCache>();

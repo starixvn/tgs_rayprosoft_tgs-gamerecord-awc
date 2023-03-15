@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Tgs.GameCommand.Client;
 using Tgs.GameCommand.Common;
+using Tgs.GameInterface.AwcService.Client;
 using Tgs.GameRecord.AwcService.Core;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -59,6 +60,13 @@ public static class ServiceRegisterExtensions
                     }
                 }
             }
+
+            var gameInterfaceAwcServiceClient = scope.ServiceProvider.GetRequiredService<IGameInterfaceAwcServiceClient>();
+
+            _ = await gameInterfaceAwcServiceClient
+                 .CheckingServiceAsync(
+                    machineName: Environment.MachineName)
+                 .ConfigureAwait(false);
         }
 
         return app;

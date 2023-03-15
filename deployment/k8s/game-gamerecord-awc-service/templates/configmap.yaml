@@ -13,17 +13,10 @@ data:
           "Default": "Warning"
           }
       },
-      "GameRecordInfo": {
-        "GameProviderCode": "AWC",
-        "IntervalMinutes": 3,
-        "IntervalMinutesMax": 60,
-        "IntervalMinutesMinimum": 1,
-        "LockMinute": 2
-      },
       "GameRecord": {
         "GameCommandClientBaseUrl": "http://game-gamecommand/",
         "GameRoundsScheduleClientBaseUrl": "http://game-gamerounds-schedule:9090/",
-        "GameInterfaceClientBaseUrl": "http://game-gameinterface-awc-service:9090/"
+        "GameInterfaceClientBaseUrl": "dns:///game-gameinterface-awc-service:9090/"
       }
     }
   monitor.settings.json: |
