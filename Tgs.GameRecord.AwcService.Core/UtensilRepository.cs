@@ -98,21 +98,21 @@ internal class UtensilRepository : IUtensil
         return gameProviderId;
     }
 
-    public RoundBiddingClientStatus GetGameRoundClientStatus(RoundBiddingStatus gameRoundStatus, decimal playerWinLose)
+    public RoundClientStatus GetGameRoundClientStatus(RoundStatus gameRoundStatus, decimal playerWinLose)
         => gameRoundStatus switch
         {
-            RoundBiddingStatus.Void => RoundBiddingClientStatus.Void,
-            RoundBiddingStatus.Closed => (playerWinLose > 0) ? RoundBiddingClientStatus.Win : RoundBiddingClientStatus.Loss,
-            _ => RoundBiddingClientStatus.Open
+            RoundStatus.Void => RoundClientStatus.Void,
+            RoundStatus.Closed => (playerWinLose > 0) ? RoundClientStatus.Win : RoundClientStatus.Loss,
+            _ => RoundClientStatus.Open
         };
 
-    public RoundBiddingStatus GetGameRoundStatus(int txStatus, int settleStatus)
+    public RoundStatus GetGameRoundStatus(int txStatus, int settleStatus)
         => txStatus switch
         {
-            0 => RoundBiddingStatus.Open,
-            2 => RoundBiddingStatus.Void,
-            1 => (settleStatus is 0 or 1) ? RoundBiddingStatus.Closed : RoundBiddingStatus.Void,
-            _ => RoundBiddingStatus.Void
+            0 => RoundStatus.Open,
+            2 => RoundStatus.Void,
+            1 => (settleStatus is 0 or 1) ? RoundStatus.Closed : RoundStatus.Void,
+            _ => RoundStatus.Void
         };
 
     public async ValueTask<PlayerInfo?> GetPlayerAsync(

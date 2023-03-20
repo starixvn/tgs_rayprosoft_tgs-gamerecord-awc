@@ -19,9 +19,9 @@ public interface IUtensil
         string gameProviderCode,
         CancellationToken cancellationToken = default);
 
-    RoundBiddingClientStatus GetGameRoundClientStatus(RoundBiddingStatus gameRoundStatus, decimal playerWinLose);
+    RoundClientStatus GetGameRoundClientStatus(RoundStatus gameRoundStatus, decimal playerWinLose);
 
-    RoundBiddingStatus GetGameRoundStatus(int txStatus, int settleStatus);
+    RoundStatus GetGameRoundStatus(int txStatus, int settleStatus);
 
     ValueTask<PlayerInfo?> GetPlayerAsync(
         string playerCode,

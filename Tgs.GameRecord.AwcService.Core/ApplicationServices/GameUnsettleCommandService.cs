@@ -7,20 +7,17 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
 {
-    private readonly IGameRoundsWorkManualClient _gameRoundsWorkManualClient;
-    private readonly IGameRoundsWorkClient _gameRoundsWorkServiceClient;
+    private readonly IGameRoundsWorkManualClient _client;
     private readonly ILogger<GameUnsettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameUnsettleCommandService(
         ILogger<GameUnsettleCommandService> logger,
-        IGameRoundsWorkManualClient gameRoundsWorkManualClient,
-        IGameRoundsWorkClient gameRoundsWorkServiceClient,
+        IGameRoundsWorkManualClient client,
         IUtensil utensil)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _gameRoundsWorkManualClient = gameRoundsWorkManualClient ?? throw new ArgumentNullException(nameof(gameRoundsWorkManualClient));
-        _gameRoundsWorkServiceClient = gameRoundsWorkServiceClient ?? throw new ArgumentNullException(nameof(gameRoundsWorkServiceClient));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
     }
 
@@ -84,7 +81,7 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
 
                 if (success)
                 {
-                    await _gameRoundsWorkManualClient
+                    await _client
                     .RoundBidding(
                         gameProviderId: command.GameProviderId,
                         gameProviderCode: command.GameProviderCode,
@@ -112,7 +109,7 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                 }
                 else
                 {
-                    await _gameRoundsWorkServiceClient
+                    await _client
                     .RoundMissing(
                         gameProviderId: command.GameProviderId,
                         gameProviderCode: command.GameProviderCode,

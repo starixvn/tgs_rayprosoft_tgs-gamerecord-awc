@@ -68,7 +68,7 @@ internal class GamePullRecordCommandService : ICommandService<GamePullRecordComm
                 var settleAmount = 0.0m;
                 var turnover = 0.0m;
                 var playerWinLoss = 0.0m;
-                if (status == RoundBiddingStatus.Closed)
+                if (status == RoundStatus.Closed)
                 {
                     externalClosedOn = DateTimeOffset.ParseExact(record.TxTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
                     settleAmount = record.RealWinAmount.ToDecimal().GetValueOrDefault(0);

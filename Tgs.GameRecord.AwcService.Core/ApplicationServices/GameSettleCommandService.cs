@@ -8,20 +8,17 @@ namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameSettleCommandService : ICommandService<GameSettleCommand>
 {
-    private readonly IGameRoundsWorkManualClient _gameRoundsWorkManualClient;
-    private readonly IGameRoundsWorkClient _gameRoundsWorkServiceClient;
+    private readonly IGameRoundsWorkManualClient _client;
     private readonly ILogger<GameSettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameSettleCommandService(
         ILogger<GameSettleCommandService> logger,
-        IGameRoundsWorkManualClient gameRoundsWorkManualClient,
-        IGameRoundsWorkClient gameRoundsWorkServiceClient,
+        IGameRoundsWorkManualClient client,
         IUtensil utensil)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _gameRoundsWorkManualClient = gameRoundsWorkManualClient ?? throw new ArgumentNullException(nameof(gameRoundsWorkManualClient));
-        _gameRoundsWorkServiceClient = gameRoundsWorkServiceClient ?? throw new ArgumentNullException(nameof(gameRoundsWorkServiceClient));
+        _client = client ?? throw new ArgumentNullException(nameof(client));
         _utensil = utensil ?? throw new ArgumentNullException(nameof(utensil));
     }
 
@@ -73,7 +70,7 @@ internal class GameSettleCommandService : ICommandService<GameSettleCommand>
                 var settleAmount = 0.0m;
                 var turnover = 0.0m;
                 var playerWinLoss = 0.0m;
-                if (status == RoundBiddingStatus.Closed)
+                if (status == RoundStatus.Closed)
                 {
                     externalClosedOn = DateTimeOffset.ParseExact(record.TxTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
                     settleAmount = record.RealWinAmount.ToDecimal().GetValueOrDefault(0);
@@ -110,7 +107,7 @@ internal class GameSettleCommandService : ICommandService<GameSettleCommand>
 
                 if (success)
                 {
-                    await _gameRoundsWorkManualClient
+                    await _client
                     .RoundBidding(
                         gameProviderId: command.GameProviderId,
                         gameProviderCode: command.GameProviderCode,
@@ -138,7 +135,7 @@ internal class GameSettleCommandService : ICommandService<GameSettleCommand>
                 }
                 else
                 {
-                    await _gameRoundsWorkServiceClient
+                    await _client
                     .RoundMissing(
                         gameProviderId: command.GameProviderId,
                         gameProviderCode: command.GameProviderCode,
