@@ -1,19 +1,20 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Tgs.GameRounds.Work.Manual.Client;
+using Tgs.GameRounds.Work.Client;
+using Tgs.GameRounds.Work.Common.Protos;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.AwcService.Core.ApplicationServices;
 
 internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
 {
-    private readonly IGameRoundsWorkManualClient _client;
+    private readonly IGameRoundsWorkClient _client;
     private readonly ILogger<GameUnsettleCommandService> _logger;
     private readonly IUtensil _utensil;
 
     public GameUnsettleCommandService(
         ILogger<GameUnsettleCommandService> logger,
-        IGameRoundsWorkManualClient client,
+        IGameRoundsWorkClient client,
         IUtensil utensil)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -93,8 +94,8 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                         currencyCode: playerModel!.DefaultWalletCurrencyCode,
                         brandId: playerModel!.BrandId,
                         gameProviderConfigurationId: gameProviderConfigurationId!.Value,
-                        status: GameRounds.Work.Manual.Common.Protos.RoundStatus.Open,
-                        clientStatus: GameRounds.Work.Manual.Common.Protos.RoundClientStatus.Open,
+                        status: RoundStatus.Open,
+                        clientStatus: RoundClientStatus.Open,
                         externalCreatedOn: externalCreatedOn,
                         externalClosedOn: null,
                         bet: record.BetAmount.ToDecimal().GetValueOrDefault(0),
