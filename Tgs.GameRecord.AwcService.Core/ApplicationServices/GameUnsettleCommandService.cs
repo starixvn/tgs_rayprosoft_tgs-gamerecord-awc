@@ -28,37 +28,24 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
         {
             try
             {
-                bool success = true;
                 var playerModel = await _utensil
                     .GetPlayerAsync(
-                        playerCode: record.UserId,
-                        cancellationToken: cancellationToken)
+                    playerCode: record.UserId,
+                    cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
                 var gameId = await _utensil
                     .GetGameIdAsync(
-                        gameProviderId: command.GameProviderId,
-                        gameExternalId: record.GameCode,
-                        cancellationToken: cancellationToken)
+                    gameProviderId: command.GameProviderId,
+                    gameExternalId: record.GameCode,
+                    cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                if (playerModel == null || !gameId.HasValue)
-                {
-                    success = false;
-                }
 
-                Guid? gameProviderConfigurationId = default;
-                if (playerModel != null)
-                {
-                    gameProviderConfigurationId = await _utensil
-                        .GetBrandGameProviderConfigurationIdAsync(
-                            brandId: playerModel.BrandId,
-                            gameProviderId: command.GameProviderId,
-                            cancellationToken: cancellationToken)
-                        .ConfigureAwait(false);
-                    if (!gameProviderConfigurationId.HasValue)
-                    {
-                        success = false;
-                    }
-                }
+                var gameProviderConfigurationId = await _utensil
+                    .GetBrandGameProviderConfigurationIdAsync(
+                    brandId: playerModel.BrandId,
+                    gameProviderId: command.GameProviderId,
+                    cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
 
                 var externalCreatedOn = DateTimeOffset.ParseExact(record.BetTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
 
@@ -80,52 +67,35 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                     record.GameInfo
                 };
 
-                if (success)
-                {
-                    await _client
-                    .RoundBidding(
-                        gameProviderId: command.GameProviderId,
-                        gameProviderCode: command.GameProviderCode,
-                        externalRoundId: record.ExternalRoundId,
-                        gameId: gameId!.Value,
-                        externalGameId: record.GameCode,
-                        playerCode: playerModel!.PlayerCode,
-                        walletId: playerModel!.DefaultWalletId,
-                        currencyCode: playerModel!.DefaultWalletCurrencyCode,
-                        brandId: playerModel!.BrandId,
-                        gameProviderConfigurationId: gameProviderConfigurationId!.Value,
-                        status: RoundStatus.Open,
-                        clientStatus: RoundClientStatus.Open,
-                        externalCreatedOn: externalCreatedOn,
-                        externalClosedOn: null,
-                        bet: record.BetAmount.ToDecimal().GetValueOrDefault(0),
-                        validBet: record.RealBetAmount.ToDecimal().GetValueOrDefault(0),
-                        settle: 0,
-                        commission: 0,
-                        turnover: record.RealBetAmount.ToDecimal().GetValueOrDefault(0),
-                        playerWinLoss: 0,
-                        additionalData: JsonSerializer.Serialize(additionalData),
-                        cancellationToken: cancellationToken)
+                await _client
+                    .RoundExchangeRateBiddingAsync(
+                    gameProviderId: command.GameProviderId,
+                    gameProviderCode: command.GameProviderCode,
+                    externalRoundId: record.ExternalRoundId,
+                    gameId: gameId,
+                    externalGameId: record.GameCode,
+                    playerCode: playerModel.PlayerCode,
+                    walletId: playerModel.DefaultWalletId,
+                    currencyCode: playerModel.DefaultWalletCurrencyCode,
+                    brandId: playerModel.BrandId,
+                    gameProviderConfigurationId: gameProviderConfigurationId,
+                    status: RoundStatus.Open,
+                    clientStatus: RoundClientStatus.Open,
+                    externalCreatedOn: externalCreatedOn,
+                    externalClosedOn: null,
+                    bet: record.BetAmount.ToDecimal().GetValueOrDefault(0),
+                    validBet: record.RealBetAmount.ToDecimal().GetValueOrDefault(0),
+                    settle: 0,
+                    commission: 0,
+                    turnover: record.RealBetAmount.ToDecimal().GetValueOrDefault(0),
+                    playerWinLoss: 0,
+                    additionalData: JsonSerializer.Serialize(additionalData),
+                    cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                }
-                else
-                {
-                    await _client
-                    .RoundMissing(
-                        gameProviderId: command.GameProviderId,
-                        gameProviderCode: command.GameProviderCode,
-                        externalRoundId: record.ExternalRoundId,
-                        gameId: gameId ?? -1,
-                        externalGameId: record.GameCode,
-                        playerCode: playerModel?.PlayerCode ?? string.Empty,
-                        data: JsonSerializer.Serialize(additionalData),
-                        cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "遊戲未結算處理發生例外.({record})", record);
+                _logger.LogError(ex, "LogOn:{logOn} Message: game record exception.({gameRecord})", DateTime.Now.ToString("o"), record);
             }
         }
     }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tgs.GameCommand.Client;
 using Tgs.GameCommand.Common;
+using Tgs.GameRounds.Work.Common.Protos;
 
 namespace Tgs.GameRecord.AwcService.Core.UnitTest;
 
@@ -54,9 +55,7 @@ public class UtensilRepositoryUnitTest
                 gameProviderId)
             .ConfigureAwait(false);
 
-        Assert.IsNotNull(actual);
-        Assert.IsTrue(actual.HasValue);
-        Assert.AreEqual(gameProviderConfigurationId, actual.Value);
+        Assert.AreEqual(gameProviderConfigurationId, actual);
 
         _ = fakeMemoryCache
             .Received(1)
@@ -107,9 +106,7 @@ public class UtensilRepositoryUnitTest
                 gameExternalId)
             .ConfigureAwait(false);
 
-        Assert.IsNotNull(actual);
-        Assert.IsTrue(actual.HasValue);
-        Assert.AreEqual(gameId, actual.Value);
+        Assert.AreEqual(gameId, actual);
 
         _ = fakeMemoryCache
             .Received(1)
@@ -204,6 +201,248 @@ public class UtensilRepositoryUnitTest
                 gameProviderCode)
              .AsTask())
              .ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public void TxStatus_1_Is_Closed_True()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.IsClosed(2);
+
+        Assert.IsTrue(actual);
+    }
+
+    [TestMethod]
+    public void TxStatus_0_Is_Closed_False()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.IsClosed(0);
+
+        Assert.IsFalse(actual);
+    }
+
+    [TestMethod]
+    public void TxStatus_2_SettleStatus_Minus_1_Is_Void_True()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.IsVoid(2, -1);
+
+        Assert.IsTrue(actual);
+    }
+
+    [TestMethod]
+    public void TxStatus_1_SettleStatus_0_Is_Void_False()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.IsVoid(1, 0);
+
+        Assert.IsFalse(actual);
+    }
+
+    [TestMethod]
+    public void TxStatus_1_SettleStatus_Minus_1_Is_Void_True()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.IsVoid(1, -1);
+
+        Assert.IsTrue(actual);
+    }
+
+    [TestMethod]
+    public void TxStatus_3_SettleStatus_Minus_1_Is_Void_True()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.IsVoid(3, -1);
+
+        Assert.IsTrue(actual);
+    }
+
+    [TestMethod]
+    public void TxStatus_1_SettleStatus_1_Is_Void_False()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.IsVoid(1, 1);
+
+        Assert.IsFalse(actual);
+    }
+
+    [TestMethod]
+    public void GameRound_Client_Status_Is_Open()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.GetGameRoundClientStatus(isClosed: false, isVoid: false, playerWinLose: 0);
+
+        Assert.AreEqual(RoundClientStatus.Open, actual);
+    }
+
+    [TestMethod]
+    public void GameRound_Client_Status_Is_Void()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.GetGameRoundClientStatus(isClosed: true, isVoid: true, playerWinLose: 0);
+
+        Assert.AreEqual(RoundClientStatus.Void, actual);
+    }
+
+    [TestMethod]
+    public void GameRound_Client_Status_Is_Win()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.GetGameRoundClientStatus(isClosed: true, isVoid: false, playerWinLose: 10);
+
+        Assert.AreEqual(RoundClientStatus.Win, actual);
+    }
+
+    [TestMethod]
+    public void GameRound_Client_Status_Is_Loss()
+    {
+        var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+        {
+            GameProviderCode = "AWC"
+        });
+        var fakeClient = Substitute.For<IGameCommandClient>();
+        var fakeMemoryCache = Substitute.For<IMemoryCache>();
+        var absoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+
+        var repository = new UtensilRepository(
+            gameRecordInfo,
+            fakeClient,
+            fakeMemoryCache,
+            absoluteExpirationRelativeToNow);
+
+        var actual = repository.GetGameRoundClientStatus(isClosed: true, isVoid: false, playerWinLose: -10);
+
+        Assert.AreEqual(RoundClientStatus.Loss, actual);
     }
 
     [TestMethod]

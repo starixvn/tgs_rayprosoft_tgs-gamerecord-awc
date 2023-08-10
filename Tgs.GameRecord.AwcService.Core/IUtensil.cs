@@ -5,12 +5,12 @@ namespace Tgs.GameRecord.AwcService.Core;
 
 public interface IUtensil
 {
-    ValueTask<Guid?> GetBrandGameProviderConfigurationIdAsync(
+    ValueTask<Guid> GetBrandGameProviderConfigurationIdAsync(
         Guid brandId,
         Guid gameProviderId,
         CancellationToken cancellationToken = default);
 
-    ValueTask<int?> GetGameIdAsync(
+    ValueTask<int> GetGameIdAsync(
         Guid gameProviderId,
         string gameExternalId,
         CancellationToken cancellationToken = default);
@@ -19,11 +19,16 @@ public interface IUtensil
         string gameProviderCode,
         CancellationToken cancellationToken = default);
 
-    RoundClientStatus GetGameRoundClientStatus(RoundStatus gameRoundStatus, decimal playerWinLose);
+    RoundClientStatus GetGameRoundClientStatus(
+        bool isClosed,
+        bool isVoid,
+        decimal playerWinLose);
 
-    RoundStatus GetGameRoundStatus(int txStatus, int settleStatus);
-
-    ValueTask<PlayerInfo?> GetPlayerAsync(
+    ValueTask<PlayerInfo> GetPlayerAsync(
         string playerCode,
         CancellationToken cancellationToken = default);
+
+    bool IsClosed(int txStatus);
+
+    bool IsVoid(int txStatus, int settleStatus);
 }
