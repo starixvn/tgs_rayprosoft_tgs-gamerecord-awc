@@ -1,31 +1,17 @@
 ﻿using Tgs.GameCommand.Common;
-using Tgs.GameRounds.Work.Common.Protos;
+using Tgs.GameRecord.Handle.Common.Protos;
 
 namespace Tgs.GameRecord.AwcService.Core;
 
 public interface IUtensil
 {
-    ValueTask<Guid> GetBrandGameProviderConfigurationIdAsync(
-        Guid brandId,
-        Guid gameProviderId,
-        CancellationToken cancellationToken = default);
-
-    ValueTask<int> GetGameIdAsync(
-        Guid gameProviderId,
-        string gameExternalId,
-        CancellationToken cancellationToken = default);
-
-    ValueTask<Guid> GetGameProviderIdAsync(
-        string gameProviderCode,
-        CancellationToken cancellationToken = default);
-
-    RoundClientStatus GetGameRoundClientStatus(
+    GameRecordClientStatus GetClientStatus(
         bool isClosed,
         bool isVoid,
         decimal playerWinLose);
 
-    ValueTask<PlayerInfo> GetPlayerAsync(
-        string playerCode,
+    ValueTask<Guid> GetGameProviderIdAsync(
+        string gameProviderCode,
         CancellationToken cancellationToken = default);
 
     bool IsClosed(int txStatus);

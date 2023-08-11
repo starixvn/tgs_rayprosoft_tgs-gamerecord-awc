@@ -35,32 +35,6 @@ public static class ServiceRegisterExtensions
                 }
             }
 
-            foreach (var gameProviderIdInfo in gameProviderIdInfos)
-            {
-                if (gameProviderIdInfo.GameProviderCode.StartsWith(gameRecordInfo.GameProviderCode, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    _ = await utensil
-                        .GetGameProviderIdAsync(
-                            gameProviderIdInfo.GameProviderCode)
-                        .ConfigureAwait(false);
-
-                    var games = client
-                        .GameQueryAsync(
-                        gameProviderCode: gameRecordInfo.GameProviderCode)
-                        .ToEnumerable()
-                        ?? Enumerable.Empty<GameInfo>();
-
-                    foreach (var game in games)
-                    {
-                        _ = await utensil
-                            .GetGameIdAsync(
-                                gameProviderId: gameProviderIdInfo.GameProviderId,
-                                gameExternalId: game.GameExternalId)
-                            .ConfigureAwait(false);
-                    }
-                }
-            }
-
             var gameInterfaceAwcServiceClient = scope.ServiceProvider.GetRequiredService<IGameInterfaceAwcServiceClient>();
 
             _ = await gameInterfaceAwcServiceClient

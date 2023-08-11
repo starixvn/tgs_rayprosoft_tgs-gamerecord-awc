@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using Tgs.GameCommand.Client;
 using Tgs.GameCommand.Common;
-using Tgs.GameRounds.Work.Common.Protos;
+using Tgs.GameRecord.Handle.Common.Protos;
 
 namespace Tgs.GameRecord.AwcService.Core;
 
@@ -51,8 +51,14 @@ internal class UtensilRepository : IUtensil
         return gameProviderConfigurationId;
     }
 
+    public GameRecordClientStatus GetClientStatus(
+        bool isClosed,
+        bool isVoid,
+        decimal playerWinLose)
+        => !isClosed ? GameRecordClientStatus.Open : isVoid ? GameRecordClientStatus.Void : playerWinLose > 0 ? GameRecordClientStatus.Win : GameRecordClientStatus.Loss;
+
     public async ValueTask<int> GetGameIdAsync(
-        Guid gameProviderId,
+            Guid gameProviderId,
         string gameExternalId,
         CancellationToken cancellationToken = default)
     {
@@ -93,12 +99,6 @@ internal class UtensilRepository : IUtensil
         }
         return gameProviderId;
     }
-
-    public RoundClientStatus GetGameRoundClientStatus(
-        bool isClosed,
-        bool isVoid,
-        decimal playerWinLose)
-        => !isClosed ? RoundClientStatus.Open : isVoid ? RoundClientStatus.Void : playerWinLose > 0 ? RoundClientStatus.Win : RoundClientStatus.Loss;
 
     public async ValueTask<PlayerInfo> GetPlayerAsync(
         string playerCode,
