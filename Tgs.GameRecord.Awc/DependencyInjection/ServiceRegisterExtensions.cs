@@ -17,7 +17,7 @@ public static class ServiceRegisterExtensions
         return app;
     }
 
-    public static async Task<WebApplication> UseRegister(this WebApplication app)
+    public static async Task<WebApplication> UseRegisterAsync(this WebApplication app)
     {
         using (var scope = app.Services.CreateScope())
         {
