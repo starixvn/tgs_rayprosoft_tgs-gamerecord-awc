@@ -1,8 +1,8 @@
 variables:
-  ImageServiceName: pgtgs/game-gamerecord-awc-service
-  SettingServiceKey: game-gamerecord-awc-service
-  HelmTemplateFolderServiceName: game-gamerecord-awc-service
-  BuildCacheKey: Tgs.GameRecord.AwcService.$CI_PIPELINE_ID
+  ImageServiceName: pgtgs/game-gamerecord-awc
+  SettingServiceKey: game-gamerecord-awc
+  HelmTemplateFolderServiceName: game-gamerecord-awc
+  BuildCacheKey: Tgs.GameRecord.Awc.$CI_PIPELINE_ID
 
 default:
   before_script:
@@ -59,7 +59,7 @@ push-docker-image:
     untracked: true   
     policy: pull
   script:
-    - dotnet build "Tgs.GameRecord.AwcService/Tgs.GameRecord.AwcService.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageServiceName:$Tag" --no-restore
+    - dotnet build "Tgs.GameRecord.Awc/Tgs.GameRecord.Awc.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageServiceName:$Tag" --no-restore
     - docker push $ImageServiceName:$Tag
 
 push-k8s-template:

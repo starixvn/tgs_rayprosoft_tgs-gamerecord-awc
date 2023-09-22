@@ -1,6 +1,6 @@
-# tgs-gamerecord-awc-service
+# tgs-gamerecord-awc
 
-Tgs GameRecord Awc Service
+Tgs Game Record Awc
 
 ## Getting started
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://gitlab.com/rayprosoft/tgs-gamerecord-awc-service.git
+git remote add origin https://gitlab.com/rayprosoft/tgs-gamerecord-awc.git
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gitlab.com/rayprosoft/tgs-gamerecord-awc-service/-/settings/integrations)
+- [ ] [Set up project integrations](https://gitlab.com/rayprosoft/tgs-gamerecord-awc/-/settings/integrations)
 
 ## Collaborate with your team
 
