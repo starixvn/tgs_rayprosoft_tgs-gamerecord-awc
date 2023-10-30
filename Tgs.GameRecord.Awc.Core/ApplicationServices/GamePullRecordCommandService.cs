@@ -47,33 +47,6 @@ internal class GamePullRecordCommandService : ICommandService<GamePullRecordComm
                     wagerState = _utensil.GetWagerStates(isVoid, settleAmount);
                 }
 
-                var additionalData = new
-                {
-                    record.ExternalRoundId,
-                    record.Platform,
-                    record.PlatformTxId,
-                    record.GameType,
-                    record.GameCode,
-                    record.GameName,
-                    record.RoundId,
-                    record.UserId,
-                    record.Currency,
-                    record.TxStatus,
-                    record.SettleStatus,
-                    record.BetTime,
-                    record.TxTime,
-                    record.UpdateTime,
-                    record.BetType,
-                    BetAmount = record.BetAmount.ToDecimal(),
-                    RealBetAmount = record.RealBetAmount.ToDecimal(),
-                    Turnover = record.Turnover.ToDecimal(),
-                    WinAmount = record.WinAmount.ToDecimal(),
-                    RealWinAmount = record.RealWinAmount.ToDecimal(),
-                    JackpotBetAmount = record.JackpotBetAmount.ToDecimal(),
-                    JackpotWinAmount = record.JackpotWinAmount.ToDecimal(),
-                    record.GameInfo
-                };
-
                 await _client
                     .MessageAsync(
                     gameProviderCode: command.GameProviderCode,
@@ -84,7 +57,7 @@ internal class GamePullRecordCommandService : ICommandService<GamePullRecordComm
                     gambleState: GambleStates.None,
                     cashoutState: CashoutStates.None,
                     resettleState: ResettleStates.None,
-                    externalRoundId: record.ExternalRoundId,
+                    externalRoundId: record.RoundId,
                     externalWagerId: record.ExternalRoundId,
                     externalGameId: record.GameCode,
                     externalCreatedOn: externalCreatedOn,
@@ -97,7 +70,7 @@ internal class GamePullRecordCommandService : ICommandService<GamePullRecordComm
                     commission: 0.0m,
                     turnover: turnover,
                     winLoss: winLoss,
-                    additionalData: JsonSerializer.Serialize(additionalData),
+                    additionalData: record.AdditionalData,
                     cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
             }

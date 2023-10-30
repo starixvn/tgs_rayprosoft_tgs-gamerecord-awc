@@ -28,23 +28,6 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                 var externalCreatedOn = DateTimeOffset.ParseExact(record.BetTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
                 var betAmount = record.BetAmount.ToDecimal().GetValueOrDefault(0);
                 var validBetAmount = record.RealBetAmount.ToDecimal().GetValueOrDefault(0);
-                var additionalData = new
-                {
-                    record.ExternalRoundId,
-                    record.Platform,
-                    record.PlatformTxId,
-                    record.GameType,
-                    record.GameCode,
-                    record.GameName,
-                    record.RoundId,
-                    record.UserId,
-                    record.Currency,
-                    record.BetTime,
-                    record.BetType,
-                    BetAmount = record.BetAmount.ToDecimal().GetValueOrDefault(0),
-                    RealBetAmount = record.RealBetAmount.ToDecimal().GetValueOrDefault(0),
-                    record.GameInfo
-                };
 
                 await _client
                     .MessageAsync(
@@ -56,7 +39,7 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                     gambleState: GambleStates.None,
                     cashoutState: CashoutStates.None,
                     resettleState: ResettleStates.None,
-                    externalRoundId: record.ExternalRoundId,
+                    externalRoundId: record.RoundId,
                     externalWagerId: record.ExternalRoundId,
                     externalGameId: record.GameCode,
                     externalCreatedOn: externalCreatedOn,
@@ -69,7 +52,7 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                     commission: 0.0m,
                     turnover: 0.0m,
                     winLoss: 0.0m,
-                    additionalData: JsonSerializer.Serialize(additionalData),
+                    additionalData: record.AdditionalData,
                     cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
             }

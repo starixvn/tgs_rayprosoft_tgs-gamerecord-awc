@@ -1,5 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.ConstrainedExecution;
+using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Tgs.GameRecord.Awc.Common;
 using Tgs.GameRounds.Schedule.Client;
 using Tgs.GameRounds.Schedule.Protos;
 using Tgs.ServiceUtility;
@@ -33,29 +37,25 @@ internal class JobExecuteCommandService : ICommandService<JobExecuteCommand>
         var endTime = DateTimeOffset.ParseExact(DateTimeOffset.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
         var startTime = endTime.AddMinutes(_intervalMinutes * -1);
 
-        var parameters = new
+        var parameters = new GameRecordMessage
         {
-            command.GameProviderCode,
-            command.ApiUrl,
-            command.AgentId,
-            command.Cert,
+            ApiUrl = command.ApiUrl,
+            AgentId = command.AgentId,
+            Cert = command.Cert,
             StartTime = startTime,
             EndTime = endTime
         };
 
         _logger.LogDebug("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), parameters);
 
+
         return _client
-            .AWC_ScheduleFormQueuedAsync(
+            .ScheduleFormQueuedAsync(
             gameProviderCode: command.GameProviderCode,
             name: command.Name,
             subject: "gp.gamerecord.scheduleform.awc.queued",
             source: ScheduleFormSource.Schedule,
-            apiUrl: parameters.ApiUrl,
-            agentId: parameters.AgentId,
-            cert: parameters.Cert,
-            startTime: parameters.StartTime,
-            endTime: parameters.EndTime,
+            parameters: JsonSerializer.Serialize(parameters),
             cancellationToken: cancellationToken);
     }
 }

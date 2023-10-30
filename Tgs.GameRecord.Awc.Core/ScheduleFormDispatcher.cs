@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Tgs.GameRecord.Awc.Common;
 using Tgs.GameRounds.Schedule.Client;
-using Tgs.GameRounds.Schedule.Common.Protos;
 using Tgs.GameRounds.Schedule.Protos;
 
 namespace Tgs.GameRecord.Awc.Core;
@@ -69,17 +69,17 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-            var parameter = JsonSerializer.Deserialize<AwcParameter>(scheduleForm.Parameters)
+            var parameter = JsonSerializer.Deserialize<GameRecordMessage>(scheduleForm.Parameters)
                 ?? throw new Exception($"This game provider ({gameProviderCode}) scheduling form parameter is null. ({id})");
 
             if (scheduleForm.Source == ScheduleFormSource.Schedule)
             {
                 var command = new GameRecordScheduleCommand(
-                    GameRecordApiUrl: new Uri(parameter.ApiUrl),
+                    GameRecordApiUrl: parameter.ApiUrl,
                     GameProviderCode: scheduleForm.GameProviderCode,
                     GameProviderAgentId: parameter.AgentId,
                     GameProviderCert: parameter.Cert,
-                    StartTime: parameter.StartTime.ToDateTimeOffset());
+                    StartTime: parameter.StartTime);
 
                 _logger.LogInformation("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
 
@@ -92,12 +92,12 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
             else
             {
                 var command = new GameRecordManualCommand(
-                    GameRecordApiUrl: new Uri(parameter.ApiUrl),
+                    GameRecordApiUrl: parameter.ApiUrl,
                     GameProviderCode: scheduleForm.GameProviderCode,
                     GameProviderAgentId: parameter.AgentId,
                     GameProviderCert: parameter.Cert,
-                    StartTime: parameter.StartTime.ToDateTimeOffset(),
-                    EndTime: parameter.EndTime.ToDateTimeOffset());
+                    StartTime: parameter.StartTime,
+                    EndTime: parameter.EndTime);
 
                 _logger.LogInformation("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
 
