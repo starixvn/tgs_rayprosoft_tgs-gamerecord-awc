@@ -56,7 +56,7 @@ public class GameUnsettleCommandServiceUnitTest
             gambleState: Arg.Is(GambleStates.None),
             cashoutState: Arg.Is(CashoutStates.None),
             resettleState: Arg.Is(ResettleStates.None),
-            externalRoundId: Arg.Is(command.Records.First().ExternalRoundId),
+            externalRoundId: Arg.Is(command.Records.First().RoundId),
             externalWagerId: Arg.Is(command.Records.First().ExternalRoundId),
             externalGameId: Arg.Is(command.Records.First().GameCode),
             externalCreatedOn: Arg.Is(DateTimeOffset.ParseExact(command.Records.First().BetTime, @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind)),

@@ -1,6 +1,4 @@
-﻿using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Tgs.GameRecord.Awc.Common;
@@ -47,7 +45,6 @@ internal class JobExecuteCommandService : ICommandService<JobExecuteCommand>
         };
 
         _logger.LogDebug("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), parameters);
-
 
         return _client
             .ScheduleFormQueuedAsync(
