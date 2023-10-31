@@ -26,7 +26,8 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
             apiUrl: command.GameRecordApiUrl,
             agentId: command.GameProviderAgentId,
             cert: command.GameProviderCert,
-            timeFrom: command.StartTime,
+            startTime: command.StartTime,
+            endTime: command.EndTime,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 

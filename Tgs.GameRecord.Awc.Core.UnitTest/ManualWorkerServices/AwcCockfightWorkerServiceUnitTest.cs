@@ -32,7 +32,8 @@ public class AwcCockfightWorkerServiceUnitTest
             apiUrl: Arg.Is(command.GameRecordApiUrl),
             agentId: Arg.Is(command.GameProviderAgentId),
             cert: Arg.Is(command.GameProviderCert),
-            timeFrom: Arg.Any<DateTimeOffset>())
+            startTime: Arg.Any<DateTimeOffset>(),
+            endTime: Arg.Any<DateTimeOffset>())
             .Returns(gameUnsettleReply);
 
         var gameSettle = new GameSettleRecordReply();
