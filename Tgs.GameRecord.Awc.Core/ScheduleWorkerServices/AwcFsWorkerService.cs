@@ -24,13 +24,12 @@ internal class AwcFsWorkerService : ICommandService<AwcFsCommand>
 
     public async ValueTask ExecuteAsync(AwcFsCommand command, CancellationToken cancellationToken = default)
     {
-        var gamePullRecordReply = await _client
-            .GamePullRecordByAwcFsAsync(
-                apiUrl: command.GameRecordApiUrl,
-                agentId: command.GameProviderAgentId,
-                cert: command.GameProviderCert,
-                time_from: command.StartTime,
-                cancellationToken: cancellationToken)
+        var gamePullRecordReply = await _client.GamePullRecordByAwcFsAsync(
+            apiUrl: command.GameRecordApiUrl,
+            agentId: command.GameProviderAgentId,
+            cert: command.GameProviderCert,
+            time_from: command.StartTime,
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (gamePullRecordReply is null)
@@ -51,8 +50,7 @@ internal class AwcFsWorkerService : ICommandService<AwcFsCommand>
             GameProviderCode: command.GameProviderCode,
             Records: records);
 
-        await _pullRecordCommandService
-            .ExecuteAsync(
+        await _pullRecordCommandService.ExecuteAsync(
             command: recordCommand,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
