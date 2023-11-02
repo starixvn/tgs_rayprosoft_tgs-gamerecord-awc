@@ -50,8 +50,13 @@ internal class JobInitCommandService : ICommandService<JobInitCommand>
                 .SettingGetConfigurationStringAsync(
                 key: gameProviderConfiguration,
                 cancellationToken: cancellationToken)
-                .ConfigureAwait(false)
-                ?? throw new Exception($"This game product setting does not exist.({gameProviderConfiguration})");
+                .ConfigureAwait(false);
+
+                if (string.IsNullOrEmpty(settingConfiguration))
+                {
+                    _logger.LogError("LogOn:{logOn} Message:遊戲供應商({gameProviderCode})設定檔不存在({gameProviderConfiguration})。", DateTime.Now.ToString("o"), gameProviderCode, gameProviderConfiguration);
+                    continue;
+                }
 
                 var settingConfigurationJson = JsonNode.Parse(settingConfiguration)
                     ?? throw new Exception($"This game product setting does not exist.({gameProviderConfiguration})");
