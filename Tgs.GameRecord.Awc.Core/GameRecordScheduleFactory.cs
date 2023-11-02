@@ -17,6 +17,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
     private readonly ICommandService<AwcSgCommand> _awcSgCommand;
     private readonly ICommandService<AwcSpadeCommand> _awcSpadeCommand;
     private readonly ICommandService<AwcVenusCommand> _awcVenusWorkerService;
+    private readonly ICommandService<AwcYesbingoCommand> _awcYesbingoWorkerService;
     private readonly ICommandService<AwcYlCommand> _awcYlWorkerService;
 
     public GameRecordScheduleFactory(
@@ -32,7 +33,8 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
         ICommandService<AwcSgCommand> awcSgCommand,
         ICommandService<AwcSpadeCommand> awcSpadeCommand,
         ICommandService<AwcVenusCommand> awcVenusWorkerService,
-        ICommandService<AwcYlCommand> awcYlWorkerService
+        ICommandService<AwcYlCommand> awcYlWorkerService,
+        ICommandService<AwcYesbingoCommand> awcYesbingoWorkerService
 
         )
     {
@@ -49,6 +51,7 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
         _awcSpadeCommand = awcSpadeCommand ?? throw new ArgumentNullException(nameof(awcSpadeCommand));
         _awcVenusWorkerService = awcVenusWorkerService ?? throw new ArgumentNullException(nameof(awcVenusWorkerService));
         _awcYlWorkerService = awcYlWorkerService ?? throw new ArgumentNullException(nameof(awcYlWorkerService));
+        _awcYesbingoWorkerService = awcYesbingoWorkerService ?? throw new ArgumentNullException(nameof(awcYesbingoWorkerService));
     }
 
     public ValueTask ExecuteAsync(GameRecordScheduleCommand command, CancellationToken cancellationToken = default)
@@ -163,6 +166,15 @@ internal class GameRecordScheduleFactory : IGameRecordScheduleFactory
                     StartTime: command.StartTime),
                 cancellationToken),
             "AWC_YL" => _awcYlWorkerService
+            .ExecuteAsync(
+                command: new(
+                    GameRecordApiUrl: command.GameRecordApiUrl,
+                    GameProviderCode: command.GameProviderCode.ToUpper(),
+                    GameProviderAgentId: command.GameProviderAgentId,
+                    GameProviderCert: command.GameProviderCert,
+                    StartTime: command.StartTime),
+                cancellationToken),
+            "AWC_YESBINGO" => _awcYesbingoWorkerService
             .ExecuteAsync(
                 command: new(
                     GameRecordApiUrl: command.GameRecordApiUrl,
