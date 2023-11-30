@@ -4,22 +4,13 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
-internal class AwcYesbingoWorkerService : ICommandService<AwcYesbingoCommand>
+internal class AwcYesbingoWorkerService(
+    IGameInterfaceAwcRecordServiceClient client,
+    ICommandService<GameSettleCommand> settleCommandService) : ICommandService<AwcYesbingoCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceClient _client;
-    private readonly ICommandService<GameSettleCommand> _settleCommandService;
-
-    public AwcYesbingoWorkerService(
-        IGameInterfaceAwcRecordServiceClient client,
-        ICommandService<GameSettleCommand> settleCommandService)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _settleCommandService = settleCommandService ?? throw new ArgumentNullException(nameof(settleCommandService));
-    }
-
     public async ValueTask ExecuteAsync(AwcYesbingoCommand command, CancellationToken cancellationToken = default)
     {
-        var gameSettle = await _client.GameSettleByAwcYesbingoAsync(
+        var gameSettle = await client.GameSettleByAwcYesbingoAsync(
             apiUrl: command.GameRecordApiUrl,
             agentId: command.GameProviderAgentId,
             cert: command.GameProviderCert,
@@ -28,9 +19,9 @@ internal class AwcYesbingoWorkerService : ICommandService<AwcYesbingoCommand>
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (gameSettle.Items.Any())
+        if (gameSettle.Items.Count != 0)
         {
-            await _settleCommandService.ExecuteAsync(
+            await settleCommandService.ExecuteAsync(
                 command: new GameSettleCommand(
                     GameProviderCode: command.GameProviderCode,
                     Records: gameSettle.Items),

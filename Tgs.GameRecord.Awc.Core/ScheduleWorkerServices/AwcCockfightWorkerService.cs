@@ -6,25 +6,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ScheduleWorkerServices;
 
-internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
+internal class AwcCockfightWorkerService(
+    IGameInterfaceAwcRecordServiceClient client,
+    ILogger<AwcCockfightWorkerService> logger,
+    ICommandService<GamePullRecordCommand> pullRecordCommandService) : ICommandService<AwcCockfightCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceClient _client;
-    private readonly ILogger<AwcCockfightWorkerService> _logger;
-    private readonly ICommandService<GamePullRecordCommand> _pullRecordCommandService;
-
-    public AwcCockfightWorkerService(
-        IGameInterfaceAwcRecordServiceClient client,
-        ILogger<AwcCockfightWorkerService> logger,
-        ICommandService<GamePullRecordCommand> pullRecordCommandService)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _pullRecordCommandService = pullRecordCommandService ?? throw new ArgumentNullException(nameof(pullRecordCommandService));
-    }
-
     public async ValueTask ExecuteAsync(AwcCockfightCommand command, CancellationToken cancellationToken = default)
     {
-        var gamePullRecordReply = await _client.GamePullRecordByAwcCockfightAsync(
+        var gamePullRecordReply = await client.GamePullRecordByAwcCockfightAsync(
             apiUrl: command.GameRecordApiUrl,
             agentId: command.GameProviderAgentId,
             cert: command.GameProviderCert,
@@ -34,7 +23,7 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
 
         if (gamePullRecordReply is null)
         {
-            _logger.LogError("LogOn:{logOn} Message: This Reply is null.({command})", DateTime.Now.ToString("o"), command);
+            logger.LogError("LogOn:{logOn} Message: This Reply is null.({command})", DateTime.Now.ToString("o"), command);
             return;
         }
 
@@ -42,7 +31,7 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
 
         if (!records.Any())
         {
-            _logger.LogInformation("LogOn:{logOn} Message: The records are empty.({command})", DateTime.Now.ToString("o"), command);
+            logger.LogInformation("LogOn:{logOn} Message: The records are empty.({command})", DateTime.Now.ToString("o"), command);
             return;
         }
 
@@ -50,7 +39,7 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
             GameProviderCode: command.GameProviderCode,
             Records: records);
 
-        await _pullRecordCommandService.ExecuteAsync(
+        await pullRecordCommandService.ExecuteAsync(
             command: recordCommand,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);

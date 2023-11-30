@@ -8,14 +8,9 @@ namespace Tgs.GameRecord.Awc.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class InfoController : ControllerBase
+public class InfoController(IConfiguration configuration) : ControllerBase
 {
-    private readonly IConfiguration _configuration;
-
-    public InfoController(IConfiguration configuration)
-    {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
+    private readonly IConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     [HttpGet]
     public async Task<object> GetAsync([FromServices] IWebHostEnvironment _hostingEnvironment)

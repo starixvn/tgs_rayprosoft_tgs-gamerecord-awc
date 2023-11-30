@@ -4,25 +4,13 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
-internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
+internal class AwcCockfightWorkerService(IGameInterfaceAwcRecordServiceClient client,
+    ICommandService<GameSettleCommand> settleCommandService,
+    ICommandService<GameUnsettleCommand> unsettleCommandService) : ICommandService<AwcCockfightCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceClient _client;
-    private readonly ICommandService<GameSettleCommand> _settleCommandService;
-    private readonly ICommandService<GameUnsettleCommand> _unsettleCommandService;
-
-    public AwcCockfightWorkerService(IGameInterfaceAwcRecordServiceClient client,
-        ICommandService<GameSettleCommand> settleCommandService,
-        ICommandService<GameUnsettleCommand> unsettleCommandService)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _settleCommandService = settleCommandService ?? throw new ArgumentNullException(nameof(settleCommandService));
-        _unsettleCommandService = unsettleCommandService ?? throw new ArgumentNullException(nameof(unsettleCommandService));
-    }
-
     public async ValueTask ExecuteAsync(AwcCockfightCommand command, CancellationToken cancellationToken = default)
     {
-        var gameUnsettle = await _client
-            .GameUnsettleByAwcCockfightAsync(
+        var gameUnsettle = await client.GameUnsettleByAwcCockfightAsync(
             apiUrl: command.GameRecordApiUrl,
             agentId: command.GameProviderAgentId,
             cert: command.GameProviderCert,
@@ -31,10 +19,9 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (gameUnsettle.Items.Any())
+        if (gameUnsettle.Items.Count != 0)
         {
-            await _unsettleCommandService
-                .ExecuteAsync(
+            await unsettleCommandService.ExecuteAsync(
                 command: new GameUnsettleCommand(
                     GameProviderCode: command.GameProviderCode,
                     Records: gameUnsettle.Items),
@@ -42,20 +29,18 @@ internal class AwcCockfightWorkerService : ICommandService<AwcCockfightCommand>
                 .ConfigureAwait(false);
         }
 
-        var gameSettle = await _client
-            .GameSettleByAwcCockfightAsync(
-                apiUrl: command.GameRecordApiUrl,
-                agentId: command.GameProviderAgentId,
-                cert: command.GameProviderCert,
-                startTime: command.StartTime,
-                endTime: command.EndTime,
-                cancellationToken: cancellationToken)
+        var gameSettle = await client.GameSettleByAwcCockfightAsync(
+            apiUrl: command.GameRecordApiUrl,
+            agentId: command.GameProviderAgentId,
+            cert: command.GameProviderCert,
+            startTime: command.StartTime,
+            endTime: command.EndTime,
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (gameSettle.Items.Any())
+        if (gameSettle.Items.Count != 0)
         {
-            await _settleCommandService
-                .ExecuteAsync(
+            await settleCommandService.ExecuteAsync(
                 command: new GameSettleCommand(
                     GameProviderCode: command.GameProviderCode,
                     Records: gameSettle.Items),

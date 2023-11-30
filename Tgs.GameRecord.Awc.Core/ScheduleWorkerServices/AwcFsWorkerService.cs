@@ -6,25 +6,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ScheduleWorkerServices;
 
-internal class AwcFsWorkerService : ICommandService<AwcFsCommand>
+internal class AwcFsWorkerService(
+    IGameInterfaceAwcRecordServiceClient client,
+    ILogger<AwcFsWorkerService> logger,
+    ICommandService<GamePullRecordCommand> pullRecordCommandService) : ICommandService<AwcFsCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceClient _client;
-    private readonly ILogger<AwcFsWorkerService> _logger;
-    private readonly ICommandService<GamePullRecordCommand> _pullRecordCommandService;
-
-    public AwcFsWorkerService(
-        IGameInterfaceAwcRecordServiceClient client,
-        ILogger<AwcFsWorkerService> logger,
-        ICommandService<GamePullRecordCommand> pullRecordCommandService)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _pullRecordCommandService = pullRecordCommandService ?? throw new ArgumentNullException(nameof(pullRecordCommandService));
-    }
-
     public async ValueTask ExecuteAsync(AwcFsCommand command, CancellationToken cancellationToken = default)
     {
-        var gamePullRecordReply = await _client.GamePullRecordByAwcFsAsync(
+        var gamePullRecordReply = await client.GamePullRecordByAwcFsAsync(
             apiUrl: command.GameRecordApiUrl,
             agentId: command.GameProviderAgentId,
             cert: command.GameProviderCert,
@@ -34,7 +23,7 @@ internal class AwcFsWorkerService : ICommandService<AwcFsCommand>
 
         if (gamePullRecordReply is null)
         {
-            _logger.LogError("LogOn:{logOn} Message: This Reply is null.({command})", DateTime.Now.ToString("o"), command);
+            logger.LogError("LogOn:{logOn} Message: This Reply is null.({command})", DateTime.Now.ToString("o"), command);
             return;
         }
 
@@ -42,7 +31,7 @@ internal class AwcFsWorkerService : ICommandService<AwcFsCommand>
 
         if (!records.Any())
         {
-            _logger.LogInformation("LogOn:{logOn} Message: The records are empty.({command})", DateTime.Now.ToString("o"), command);
+            logger.LogInformation("LogOn:{logOn} Message: The records are empty.({command})", DateTime.Now.ToString("o"), command);
             return;
         }
 
@@ -50,7 +39,7 @@ internal class AwcFsWorkerService : ICommandService<AwcFsCommand>
             GameProviderCode: command.GameProviderCode,
             Records: records);
 
-        await _pullRecordCommandService.ExecuteAsync(
+        await pullRecordCommandService.ExecuteAsync(
             command: recordCommand,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);

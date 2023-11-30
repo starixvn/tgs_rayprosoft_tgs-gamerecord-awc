@@ -12,11 +12,9 @@ using Tgs.GameRecord.Awc;
 using Tgs.GameRecord.Awc.Core;
 using Tgs.GameRecord.Awc.Messages;
 
-var builder = WebApplication.CreateBuilder(args);
+var filterInstrumentations = new[] { "html", "ico", "png", "jpg" };
 
-builder.Configuration
-    .AddJsonFile("/config/appsettings.json", true)
-    .AddEnvironmentVariables();
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging
     .AddOpenTelemetry(options =>
@@ -53,16 +51,17 @@ builder.Services.AddSwaggerGen(c =>
     foreach (var xmlFileName in xmlFileNames) c.IncludeXmlComments(xmlFileName);
 });
 
-var _gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>()!;
+
 
 // Learn more about configuring Hangfire
 builder.Services.AddHangfire((sp, config) =>
 {
-    var systemConfig = sp.GetRequiredService<IConfiguration>();
+    var configuration = sp.GetRequiredService<IConfiguration>();
     var connectionString = builder.Configuration.GetConnectionString("redis")!;
+    var gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>()!;
     var options = new RedisStorageOptions
     {
-        Prefix = _gameRecordInfo.GameProviderHangfire
+        Prefix = gameRecordInfo.GameProviderHangfire
     };
     _ = config
     .UseRedisStorage(connectionString, options)
@@ -140,8 +139,7 @@ builder.Services
             && !httpContext.Request.Path.StartsWithSegments("/profiler/")
             && !httpContext.Request.Path.StartsWithSegments("/hangfire")
             && !httpContext.Request.Path.StartsWithSegments("/metrics")
-            && !new[] { "html", "ico", "png", "jpg" }.Any(
-                ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
+            && !filterInstrumentations.Any(ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
     .AddInterceptionService()
     .AddServiceUtiltiyInterceptors();
 

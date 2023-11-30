@@ -4,27 +4,14 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
-internal class AwcAelottoWorkerService : ICommandService<AwcAelottoCommand>
+internal class AwcAelottoWorkerService(
+    IGameInterfaceAwcRecordServiceClient client,
+    ICommandService<GameSettleCommand> settleCommandService,
+    ICommandService<GameUnsettleCommand> unsettleCommandService) : ICommandService<AwcAelottoCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceClient _client;
-
-    private readonly ICommandService<GameSettleCommand> _settleCommandService;
-    private readonly ICommandService<GameUnsettleCommand> _unsettleCommandService;
-
-    public AwcAelottoWorkerService(
-        IGameInterfaceAwcRecordServiceClient client,
-        ICommandService<GameSettleCommand> settleCommandService,
-        ICommandService<GameUnsettleCommand> unsettleCommandService)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _settleCommandService = settleCommandService ?? throw new ArgumentNullException(nameof(settleCommandService));
-        _unsettleCommandService = unsettleCommandService ?? throw new ArgumentNullException(nameof(unsettleCommandService));
-    }
-
     public async ValueTask ExecuteAsync(AwcAelottoCommand command, CancellationToken cancellationToken = default)
     {
-        var gameUnsettle = await _client
-            .GameUnsettleByAwcAeLottoAsync(
+        var gameUnsettle = await client.GameUnsettleByAwcAeLottoAsync(
             apiUrl: command.GameRecordApiUrl,
             agentId: command.GameProviderAgentId,
             cert: command.GameProviderCert,
@@ -33,10 +20,9 @@ internal class AwcAelottoWorkerService : ICommandService<AwcAelottoCommand>
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (gameUnsettle.Items.Any())
+        if (gameUnsettle.Items.Count != 0)
         {
-            await _unsettleCommandService
-                .ExecuteAsync(
+            await unsettleCommandService.ExecuteAsync(
                 command: new GameUnsettleCommand(
                     GameProviderCode: command.GameProviderCode,
                     Records: gameUnsettle.Items),
@@ -44,20 +30,18 @@ internal class AwcAelottoWorkerService : ICommandService<AwcAelottoCommand>
                 .ConfigureAwait(false);
         }
 
-        var gameSettle = await _client
-            .GameSettleByAwcAeLottoAsync(
-                apiUrl: command.GameRecordApiUrl,
-                agentId: command.GameProviderAgentId,
-                cert: command.GameProviderCert,
-                startTime: command.StartTime,
-                endTime: command.EndTime,
-                cancellationToken: cancellationToken)
+        var gameSettle = await client.GameSettleByAwcAeLottoAsync(
+            apiUrl: command.GameRecordApiUrl,
+            agentId: command.GameProviderAgentId,
+            cert: command.GameProviderCert,
+            startTime: command.StartTime,
+            endTime: command.EndTime,
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (gameSettle.Items.Any())
+        if (gameSettle.Items.Count != 0)
         {
-            await _settleCommandService
-                .ExecuteAsync(
+            await settleCommandService.ExecuteAsync(
                 command: new GameSettleCommand(
                     GameProviderCode: command.GameProviderCode,
                     Records: gameSettle.Items),

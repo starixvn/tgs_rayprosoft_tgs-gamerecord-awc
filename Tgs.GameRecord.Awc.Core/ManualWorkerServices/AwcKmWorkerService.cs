@@ -4,35 +4,24 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
-internal class AwcKmWorkerService : ICommandService<AwcKmCommand>
+internal class AwcKmWorkerService(
+    IGameInterfaceAwcRecordServiceClient client,
+    ICommandService<GameSettleCommand> settleCommandService) : ICommandService<AwcKmCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceClient _client;
-    private readonly ICommandService<GameSettleCommand> _settleCommandService;
-
-    public AwcKmWorkerService(
-        IGameInterfaceAwcRecordServiceClient client,
-        ICommandService<GameSettleCommand> settleCommandService)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _settleCommandService = settleCommandService ?? throw new ArgumentNullException(nameof(settleCommandService));
-    }
-
     public async ValueTask ExecuteAsync(AwcKmCommand command, CancellationToken cancellationToken = default)
     {
-        var gameSettle = await _client
-            .GameSettleByAwcKmAsync(
-                apiUrl: command.GameRecordApiUrl,
-                agentId: command.GameProviderAgentId,
-                cert: command.GameProviderCert,
-                startTime: command.StartTime,
-                endTime: command.EndTime,
-                cancellationToken: cancellationToken)
+        var gameSettle = await client.GameSettleByAwcKmAsync(
+            apiUrl: command.GameRecordApiUrl,
+            agentId: command.GameProviderAgentId,
+            cert: command.GameProviderCert,
+            startTime: command.StartTime,
+            endTime: command.EndTime,
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (gameSettle.Items.Any())
+        if (gameSettle.Items.Count != 0)
         {
-            await _settleCommandService
-                .ExecuteAsync(
+            await settleCommandService.ExecuteAsync(
                 command: new GameSettleCommand(
                     GameProviderCode: command.GameProviderCode,
                     Records: gameSettle.Items),

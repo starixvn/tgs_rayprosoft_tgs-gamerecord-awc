@@ -12,9 +12,6 @@ internal class RedisConnectionManager : IDisposable
 
     public RedisConnectionManager(IOptions<RedisOptions> optionsAccessor)
     {
-        if (optionsAccessor is null)
-            throw new ArgumentNullException(nameof(optionsAccessor));
-
         var options = optionsAccessor.Value;
 
         _connectionMultiplexer = ConnectionMultiplexer.Connect(options.ConnectionString);

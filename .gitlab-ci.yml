@@ -19,7 +19,7 @@ stages:
 build-code:
   stage: build
   script:
-    - dotnet build -c $BuildConfiguration
+    - dotnet build -c $BUILD_CONFIGURATION
   only:
     - merge_requests
     - main
@@ -32,7 +32,7 @@ unit-test:
   variables:
     DOTNET_USE_POLLING_FILE_WATCHER: "true"
   script:
-    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
+    - dotnet test -c $BUILD_CONFIGURATION -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
   needs:
     - build-code
   only:
@@ -59,7 +59,8 @@ push-docker-image:
     untracked: true   
     policy: pull
   script:
-    - dotnet build "Tgs.GameRecord.Awc/Tgs.GameRecord.Awc.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageServiceName:$Tag" --no-restore
+    #- dotnet build "Tgs.GameRecord.Awc/Tgs.GameRecord.Awc.csproj" -c $BUILD_CONFIGURATION -t:ContainerBuild -p:DockerfileTag="$ImageServiceName:$Tag" --no-restore
+    - docker build -t "$ImageName:$Tag" --build-arg [BUILD_CONFIGURATION]=$BUILD_CONFIGURATION -f "Tgs.GameRecord.Awc/Dockerfile" . --no-cache
     - docker push $ImageServiceName:$Tag
 
 push-k8s-template:

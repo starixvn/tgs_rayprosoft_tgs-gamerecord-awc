@@ -1,23 +1,15 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging;
 using Tgs.GameRecord.Handle.Client;
 using Tgs.GameRecord.Handle.Common.Protos;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ApplicationServices;
 
-internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
+internal class GameUnsettleCommandService(
+    ILogger<GameUnsettleCommandService> logger,
+    IGameRecordHandleClient client) : ICommandService<GameUnsettleCommand>
 {
-    private readonly IGameRecordHandleClient _client;
-    private readonly ILogger<GameUnsettleCommandService> _logger;
-
-    public GameUnsettleCommandService(
-        ILogger<GameUnsettleCommandService> logger,
-        IGameRecordHandleClient client)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
-
     public async ValueTask ExecuteAsync(GameUnsettleCommand command, CancellationToken cancellationToken = default)
     {
         foreach (var record in command.Records)
@@ -28,8 +20,7 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                 var betAmount = record.BetAmount.ToDecimal().GetValueOrDefault(0);
                 var validBetAmount = record.RealBetAmount.ToDecimal().GetValueOrDefault(0);
 
-                await _client
-                    .MessageAsync(
+                await client.MessageAsync(
                     gameProviderCode: command.GameProviderCode,
                     playerCode: record.UserId,
                     wagerState: WagerStates.Running,
@@ -51,13 +42,13 @@ internal class GameUnsettleCommandService : ICommandService<GameUnsettleCommand>
                     commission: 0.0m,
                     turnover: 0.0m,
                     winLoss: 0.0m,
-                    additionalData: record.AdditionalData,
+                    additionalData: JsonNode.Parse(record.AdditionalData)!,
                     cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "LogOn:{logOn} Message: An exception occurred in this game record.({gameRecord})", DateTime.Now.ToString("o"), record);
+                logger.LogError(ex, "LogOn:{logOn} Message: An exception occurred in this game record.({gameRecord})", DateTime.Now.ToString("o"), record);
             }
         }
     }

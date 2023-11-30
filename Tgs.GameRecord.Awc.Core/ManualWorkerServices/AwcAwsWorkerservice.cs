@@ -4,23 +4,13 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
-internal class AwcAwsWorkerservice : ICommandService<AwcAwsCommand>
+internal class AwcAwsWorkerservice(
+    IGameInterfaceAwcRecordServiceClient client,
+    ICommandService<GameSettleCommand> settleCommandService) : ICommandService<AwcAwsCommand>
 {
-    private readonly IGameInterfaceAwcRecordServiceClient _client;
-    private readonly ICommandService<GameSettleCommand> _settleCommandService;
-
-    public AwcAwsWorkerservice(
-        IGameInterfaceAwcRecordServiceClient client,
-        ICommandService<GameSettleCommand> settleCommandService)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _settleCommandService = settleCommandService ?? throw new ArgumentNullException(nameof(settleCommandService));
-    }
-
     public async ValueTask ExecuteAsync(AwcAwsCommand command, CancellationToken cancellationToken = default)
     {
-        var gameSettle = await _client
-            .GameSettleByAwcAwsAsync(
+        var gameSettle = await client.GameSettleByAwcAwsAsync(
             apiUrl: command.GameRecordApiUrl,
             agentId: command.GameProviderAgentId,
             cert: command.GameProviderCert,
@@ -29,10 +19,9 @@ internal class AwcAwsWorkerservice : ICommandService<AwcAwsCommand>
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        if (gameSettle.Items.Any())
+        if (gameSettle.Items.Count != 0)
         {
-            await _settleCommandService
-                .ExecuteAsync(
+            await settleCommandService.ExecuteAsync(
                 command: new GameSettleCommand(
                     GameProviderCode: command.GameProviderCode,
                     Records: gameSettle.Items),

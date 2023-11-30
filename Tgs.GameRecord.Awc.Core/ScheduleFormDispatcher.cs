@@ -6,54 +6,37 @@ using Tgs.GameRounds.Schedule.Protos;
 
 namespace Tgs.GameRecord.Awc.Core;
 
-internal class ScheduleFormDispatcher : IScheduleFormDispatcher
+internal class ScheduleFormDispatcher(
+    ILogger<ScheduleFormDispatcher> logger,
+    IGameRoundsScheduleClient clinet,
+    IScheduleFormLock scheduleFormLock,
+    IGameRecordScheduleFactory scheduleFactory,
+    IGameRecordManualFactory manualFactory) : IScheduleFormDispatcher
 {
-    private readonly IGameRoundsScheduleClient _clinet;
-    private readonly ILogger<ScheduleFormDispatcher> _logger;
-    private readonly IGameRecordManualFactory _manualFactory;
-    private readonly IGameRecordScheduleFactory _scheduleFactory;
-    private readonly IScheduleFormLock _scheduleFormLock;
-
-    public ScheduleFormDispatcher(
-        ILogger<ScheduleFormDispatcher> logger,
-        IGameRoundsScheduleClient clinet,
-        IScheduleFormLock scheduleFormLock,
-        IGameRecordScheduleFactory scheduleFactory,
-        IGameRecordManualFactory manualFactory)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _clinet = clinet ?? throw new ArgumentNullException(nameof(clinet));
-        _scheduleFormLock = scheduleFormLock ?? throw new ArgumentNullException(nameof(scheduleFormLock));
-        _scheduleFactory = scheduleFactory ?? throw new ArgumentNullException(nameof(scheduleFactory));
-        _manualFactory = manualFactory ?? throw new ArgumentNullException(nameof(manualFactory));
-    }
-
     public async ValueTask ExecuteAsync(
         string gameProviderCode,
         long id,
         CancellationToken cancellationToken = default)
     {
-        var scheduleForm = await _clinet
-            .ScheduleFormGetAsync(
-                gameProviderCode: gameProviderCode,
-                id: id,
-                cancellationToken: cancellationToken)
+        var scheduleForm = await clinet.ScheduleFormGetAsync(
+            gameProviderCode: gameProviderCode,
+            id: id,
+            cancellationToken: cancellationToken)
             .ConfigureAwait(false)
             ?? throw new Exception($"The game provider ({gameProviderCode}) cannot find the schedule form. ({id})");
 
         if (scheduleForm.State != ScheduleFormState.Queued)
         {
-            _logger.LogWarning("This game provider ({gameProviderCode}) schedule form status is not queued.({id})", gameProviderCode, id);
+            logger.LogWarning("This game provider ({gameProviderCode}) schedule form status is not queued.({id})", gameProviderCode, id);
             return;
         }
 
-        if (!await _scheduleFormLock
-            .LockingAsync(
-                gameProviderCode: gameProviderCode,
-                id: id)
+        if (!await scheduleFormLock.LockingAsync(
+            gameProviderCode: gameProviderCode,
+            id: id)
             .ConfigureAwait(false))
         {
-            _logger.LogWarning("LogOn:{logOn} Message:This game provider ({gameProviderCode}) schedule form has been locked. ({id})",
+            logger.LogWarning("LogOn:{logOn} Message:This game provider ({gameProviderCode}) schedule form has been locked. ({id})",
                 DateTime.Now.ToString("o"),
                 gameProviderCode,
                 id);
@@ -62,8 +45,7 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
 
         try
         {
-            await _clinet
-                .ScheduleFormProcessingAsync(
+            await clinet.ScheduleFormProcessingAsync(
                 gameProviderCode: gameProviderCode,
                 id: id,
                 cancellationToken: cancellationToken)
@@ -81,10 +63,9 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
                     GameProviderCert: parameter.Cert,
                     StartTime: parameter.StartTime);
 
-                _logger.LogInformation("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
+                logger.LogInformation("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
 
-                await _scheduleFactory
-                    .ExecuteAsync(
+                await scheduleFactory.ExecuteAsync(
                     command: command,
                     cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
@@ -99,17 +80,15 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
                     StartTime: parameter.StartTime,
                     EndTime: parameter.EndTime);
 
-                _logger.LogInformation("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
+                logger.LogInformation("LogOn:{logOn} execute the command:{command}", DateTime.Now.ToString("o"), command);
 
-                await _manualFactory
-                    .ExecuteAsync(
+                await manualFactory.ExecuteAsync(
                     command: command,
                     cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
             }
 
-            await _clinet
-                .ScheduleFormCompleteAsync(
+            await clinet.ScheduleFormCompleteAsync(
                 gameProviderCode: gameProviderCode,
                 id: id,
                 cancellationToken: cancellationToken)
@@ -117,23 +96,21 @@ internal class ScheduleFormDispatcher : IScheduleFormDispatcher
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred in the game provider ({gameProviderCode}) schedule form. ({id})", gameProviderCode, id);
+            logger.LogError(ex, "An exception occurred in the game provider ({gameProviderCode}) schedule form. ({id})", gameProviderCode, id);
 
-            await _clinet
-                .ScheduleFormFaileAsync(
-                    gameProviderCode: gameProviderCode,
-                    id: id,
-                    status: ex.Message,
-                    cancellationToken: cancellationToken)
+            await clinet.ScheduleFormFaileAsync(
+                gameProviderCode: gameProviderCode,
+                id: id,
+                status: ex.Message,
+                cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
         {
-            _ = await _scheduleFormLock
-                 .UnlockAsync(
-                     gameProviderCode: gameProviderCode,
-                     id: id)
-                 .ConfigureAwait(false);
+            _ = await scheduleFormLock.UnlockAsync(
+                gameProviderCode: gameProviderCode,
+                id: id)
+                .ConfigureAwait(false);
         }
     }
 }

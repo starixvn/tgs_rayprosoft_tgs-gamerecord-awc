@@ -53,13 +53,13 @@ spec:
                   name: tgs-connections
                   key: redis
           volumeMounts:
-            - mountPath: /config/appsettings.json
+            - mountPath: /app/appsettings.Production.json
               name: appsettings
               readOnly: true
               subPath: appsettings.json
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
           livenessProbe:
             httpGet:
