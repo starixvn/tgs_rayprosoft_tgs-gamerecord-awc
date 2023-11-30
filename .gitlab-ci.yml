@@ -1,7 +1,7 @@
 variables:
-  ImageServiceName: pgtgs/game-gamerecord-awc
-  SettingServiceKey: game-gamerecord-awc
-  HelmTemplateFolderServiceName: game-gamerecord-awc
+  ImageName: pgtgs/game-gamerecord-awc
+  SettingKey: game-gamerecord-awc
+  HelmTemplateFolderName: game-gamerecord-awc
   BuildCacheKey: Tgs.GameRecord.Awc.$CI_PIPELINE_ID
 
 default:
@@ -59,9 +59,9 @@ push-docker-image:
     untracked: true   
     policy: pull
   script:
-    #- dotnet build "Tgs.GameRecord.Awc/Tgs.GameRecord.Awc.csproj" -c $BUILD_CONFIGURATION -t:ContainerBuild -p:DockerfileTag="$ImageServiceName:$Tag" --no-restore
+    #- dotnet build "Tgs.GameRecord.Awc/Tgs.GameRecord.Awc.csproj" -c $BUILD_CONFIGURATION -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
     - docker build -t "$ImageName:$Tag" --build-arg [BUILD_CONFIGURATION]=$BUILD_CONFIGURATION -f "Tgs.GameRecord.Awc/Dockerfile" . --no-cache
-    - docker push $ImageServiceName:$Tag
+    - docker push $ImageName:$Tag
 
 push-k8s-template:
   stage: publish
@@ -71,12 +71,12 @@ push-k8s-template:
     - main
   script:
     - mkdir -p artifacts/k8s
-    - cp -R deployment/k8s/$HelmTemplateFolderServiceName artifacts/k8s/
+    - cp -R deployment/k8s/$HelmTemplateFolderName artifacts/k8s/
     - |
       yq -i e '
-        .image.repository = strenv(ImageServiceName) |
+        .image.repository = strenv(ImageName) |
         .image.tag = strenv(Tag)
-      ' artifacts/k8s/$HelmTemplateFolderServiceName/values.yaml
+      ' artifacts/k8s/$HelmTemplateFolderName/values.yaml
   artifacts:
     name: HelmTemplate
     untracked: false
@@ -101,12 +101,12 @@ deploy-dev:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_dev
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingServiceKey})
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingServiceKey})
+    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingKey})
     - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderServiceName \
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
         --name-template tgs \
         -f - 
@@ -118,7 +118,7 @@ deploy-dev:
       }
       EOF
     - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderServiceName \
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
         --name-template tgs \
         -f - \
@@ -148,12 +148,12 @@ deploy-staging:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_staging
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingServiceKey})
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingServiceKey})
+    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingKey})
     - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderServiceName \
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
         --name-template tgs \
         -f - 
@@ -165,7 +165,7 @@ deploy-staging:
       }
       EOF
     - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderServiceName \
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
         --name-template tgs \
         -f - \
@@ -195,12 +195,12 @@ deploy-prod:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_prod
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingServiceKey})
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingServiceKey})
+    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingKey})
     - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderServiceName \
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
         --name-template tgs \
         -f - 
@@ -212,7 +212,7 @@ deploy-prod:
       }
       EOF
     - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderServiceName \
+      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
         --name-template tgs \
         -f - \
