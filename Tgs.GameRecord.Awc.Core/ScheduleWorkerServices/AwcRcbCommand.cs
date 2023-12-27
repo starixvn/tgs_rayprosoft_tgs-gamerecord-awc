@@ -1,4 +1,8 @@
 ﻿namespace Tgs.GameRecord.Awc.Core.ScheduleWorkerServices;
 
-public record AwcRcbCommand(Uri GameRecordApiUrl, string GameProviderCode, string GameProviderAgentId, string GameProviderCert, DateTimeOffset StartTime)
-    : GameRecordScheduleCommand(GameRecordApiUrl, GameProviderCode, GameProviderAgentId, GameProviderCert, StartTime);
+public record AwcRcbCommand(
+    string GameProviderCode,
+    Uri ApiUrl,
+    string AgentId,
+    string Cert,
+    DateTimeOffset StartTime);

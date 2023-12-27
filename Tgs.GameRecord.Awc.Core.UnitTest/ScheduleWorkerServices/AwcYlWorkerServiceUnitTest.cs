@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameInterface.AwcService.Protos;
+using Tgs.GameInterface.Awc.Client;
 using Tgs.GameRecord.Awc.Core.ApplicationServices;
 using Tgs.GameRecord.Awc.Core.ScheduleWorkerServices;
 using Tgs.ServiceUtility;
@@ -16,37 +16,30 @@ public class AwcYlWorkerServiceUnitTest
     public async Task Normal_Process()
     {
         var fakeLogger = NullLogger<AwcYlWorkerService>.Instance;
-        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
-        var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
+        var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
+        var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
 
         var command = new AwcYlCommand(
-            GameRecordApiUrl: new("http://localhost/"),
+            ApiUrl: new("http://localhost/"),
             GameProviderCode: "AWC_YL",
-            GameProviderAgentId: "testAgentId",
-            GameProviderCert: "testCert",
+            AgentId: "testAgentId",
+            Cert: "testCert",
             StartTime: DateTime.UtcNow.AddMinutes(-1));
 
-        var gamePullRecordReply = new GamePullRecordReply();
-        _ = fakeClient
-            .GamePullRecordByAwcYlAsync(
-                Arg.Is(command.GameRecordApiUrl),
-                Arg.Is(command.GameProviderAgentId),
-                Arg.Is(command.GameProviderCert),
-                Arg.Any<DateTimeOffset>()).Returns(gamePullRecordReply);
-
         var service = new AwcYlWorkerService(
-            fakeClient,
             fakeLogger,
-            fakePullRecordCommandService);
+            fakeClient,
+            fakeService);
 
         await service.ExecuteAsync(command);
 
         _ = fakeClient
             .Received(1)
             .GamePullRecordByAwcYlAsync(
-                Arg.Is(command.GameRecordApiUrl),
-                Arg.Is(command.GameProviderAgentId),
-                Arg.Is(command.GameProviderCert),
-                Arg.Any<DateTimeOffset>());
+            apiUrl: Arg.Is(command.ApiUrl),
+            agentId: Arg.Is(command.AgentId),
+            cert: Arg.Is(command.Cert),
+            time_from: Arg.Any<DateTimeOffset>(),
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 }

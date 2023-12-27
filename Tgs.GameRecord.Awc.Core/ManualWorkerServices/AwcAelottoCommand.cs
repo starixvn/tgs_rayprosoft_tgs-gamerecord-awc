@@ -1,4 +1,9 @@
 ﻿namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
-public record AwcAelottoCommand(Uri GameRecordApiUrl, string GameProviderCode, string GameProviderAgentId, string GameProviderCert, DateTimeOffset StartTime, DateTimeOffset EndTime)
-    : GameRecordManualCommand(GameRecordApiUrl, GameProviderCode, GameProviderAgentId, GameProviderCert, StartTime, EndTime);
+public record AwcAelottoCommand(
+    string GameProviderCode,
+    Uri ApiUrl,
+    string AgentId,
+    string Cert,
+    DateTimeOffset StartTime,
+    DateTimeOffset EndTime);

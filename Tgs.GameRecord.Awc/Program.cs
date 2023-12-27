@@ -4,11 +4,11 @@ using Hangfire;
 using Hangfire.Console;
 using Hangfire.Redis.StackExchange;
 using Microsoft.AspNetCore.Mvc;
-using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameRecord.Awc;
+using Tgs.GameRecord.Awc.Common;
 using Tgs.GameRecord.Awc.Core;
 using Tgs.GameRecord.Awc.Messages;
 
@@ -51,8 +51,6 @@ builder.Services.AddSwaggerGen(c =>
     foreach (var xmlFileName in xmlFileNames) c.IncludeXmlComments(xmlFileName);
 });
 
-
-
 // Learn more about configuring Hangfire
 builder.Services.AddHangfire((sp, config) =>
 {
@@ -88,11 +86,6 @@ builder.Services.AddAwcServiceCore(
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameRoundsScheduleClientBaseUrl")!;
-    },
-    (options, sp) =>
-    {
-        var configuration = sp.GetRequiredService<IConfiguration>();
         options.BaseUrl = configuration.GetValue<Uri>("GameRecord:GameInterfaceClientBaseUrl")!;
     });
 
@@ -106,7 +99,8 @@ builder.Services
             var configuration = sp.GetRequiredService<IConfiguration>();
             options.Url = configuration.GetConnectionString("Nats")!;
         })
-        .AddHandler<ScheduleFormQueuedMessageHandler>(subject: "gp.gamerecord.scheduleform.awc.queued", "gp.gamerecord.scheduleform.awc.queued");
+        .AddHandler<GameRecordScheduleMessageHandler>(AwcNatsConst.SchedulePublish, AwcNatsConst.SchedulePublish)
+        .AddHandler<GameRecordManualMessageHandler>(AwcNatsConst.ManualPublish, AwcNatsConst.ManualPublish);
     })
     .ClearAllExchanges()
     .AddNatsGlobPatternExchange("*");
@@ -119,7 +113,14 @@ builder.Services
         .AddSource("Tgs.*")
         .AddSource("TGS.*")
         .AddSource("Valhalla.*")
-        .AddAspNetCoreInstrumentation()
+        .AddAspNetCoreInstrumentation(options => options.Filter =
+            httpContext => !httpContext.Request.Path.HasValue
+            || !httpContext.Request.Path.StartsWithSegments("/swagger")
+            && !httpContext.Request.Path.StartsWithSegments("/healthz")
+            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
+            && !httpContext.Request.Path.StartsWithSegments("/hangfire")
+            && !httpContext.Request.Path.StartsWithSegments("/metrics")
+            && !filterInstrumentations.Any(ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
         .AddHttpClientInstrumentation()
         .AddGrpcClientInstrumentation()
         .AddGrpcCoreInstrumentation()
@@ -127,19 +128,11 @@ builder.Services
         .AddOtlpExporter())
     .WithMetrics(meterBuiler => meterBuiler
     .SetResourceBuilder(ResourceBuilder.CreateDefault()
-    .AddEnvironmentVariableDetector())
-    .AddRuntimeInstrumentation()
-    .AddAspNetCoreInstrumentation()
-    .AddOtlpExporter())
+        .AddEnvironmentVariableDetector())
+        .AddRuntimeInstrumentation()
+        .AddAspNetCoreInstrumentation()
+        .AddOtlpExporter())
     .Services
-    .Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
-        httpContext => !httpContext.Request.Path.HasValue
-            || !httpContext.Request.Path.StartsWithSegments("/swagger")
-            && !httpContext.Request.Path.StartsWithSegments("/healthz")
-            && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-            && !httpContext.Request.Path.StartsWithSegments("/hangfire")
-            && !httpContext.Request.Path.StartsWithSegments("/metrics")
-            && !filterInstrumentations.Any(ext => httpContext.Request.Path.Value.EndsWith($".{ext}")))
     .AddInterceptionService()
     .AddServiceUtiltiyInterceptors();
 
@@ -168,7 +161,5 @@ _ = app.MapControllers();
 app.MapHealthChecks("/healthz");
 
 _ = app.UseHangfireRegisterAsync();
-
-_ = app.UseRegisterAsync();
 
 app.Run();

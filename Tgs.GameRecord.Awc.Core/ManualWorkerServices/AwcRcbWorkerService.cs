@@ -1,50 +1,56 @@
-﻿using Tgs.GameInterface.AwcService.Client;
+﻿using Tgs.GameInterface.Awc.Client;
+using Tgs.GameInterface.Awc.Protos;
 using Tgs.GameRecord.Awc.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
-internal class AwcRcbWorkerService(IGameInterfaceAwcRecordServiceClient client,
-    ICommandService<GameSettleCommand> settleCommandService,
-    ICommandService<GameUnsettleCommand> unsettleCommandService) : ICommandService<AwcRcbCommand>
+internal class AwcRcbWorkerService(
+    IGameInterfaceAwcRecordClient client,
+    ICommandService<PullRecordCommand> service) : ICommandService<AwcRcbCommand>
 {
     public async ValueTask ExecuteAsync(AwcRcbCommand command, CancellationToken cancellationToken = default)
     {
-        var gameUnsettle = await client
-            .GameUnsettleByAwcRcbAsync(
-            apiUrl: command.GameRecordApiUrl,
-            agentId: command.GameProviderAgentId,
-            cert: command.GameProviderCert,
+        var infos = await client.GameUnsettleByAwcRcbAsync(
+            apiUrl: command.ApiUrl,
+            agentId: command.AgentId,
+            cert: command.Cert,
             startTime: command.StartTime,
             endTime: command.EndTime,
             cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+            .ToArrayAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? Enumerable.Empty<GameWagerInfo>();
 
-        if (gameUnsettle.Items.Count != 0)
+        if (infos.Any())
         {
-            await unsettleCommandService.ExecuteAsync(
-                command: new GameUnsettleCommand(
+            await service.ExecuteAsync(
+                command: new PullRecordCommand(
                     GameProviderCode: command.GameProviderCode,
-                    Records: gameUnsettle.Items),
+                    Infos: infos),
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
 
-        var gameSettle = await client.GameSettleByAwcRcbAsync(
-            apiUrl: command.GameRecordApiUrl,
-            agentId: command.GameProviderAgentId,
-            cert: command.GameProviderCert,
+        infos = await client.GameSettleByAwcRcbAsync(
+            apiUrl: command.ApiUrl,
+            agentId: command.AgentId,
+            cert: command.Cert,
             startTime: command.StartTime,
             endTime: command.EndTime,
             cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+            .ToArrayAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? Enumerable.Empty<GameWagerInfo>();
 
-        if (gameSettle.Items.Count != 0)
+        if (infos.Any())
         {
-            await settleCommandService.ExecuteAsync(
-                command: new GameSettleCommand(
+            await service.ExecuteAsync(
+                command: new PullRecordCommand(
                     GameProviderCode: command.GameProviderCode,
-                    Records: gameSettle.Items),
+                    Infos: infos),
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }

@@ -1,24 +1,43 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: configmap-{{ include "game-gamerecord-awc.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "game-gamerecord-awc.labels" . | nindent 4 }}
+  name: configmap-{{ include "game-gamerecord-awc.name" . }}
+  namespace: {{ .Values.namespace }}
 data:
   appsettings.json: |
-    {
-      "Logging": {
-         "LogLevel": {
-          "Default": "Warning"
-          }
-      },
-      "GameRecord": {
-        "GameCommandClientBaseUrl": "http://game-gamecommand/",
-        "GameRoundsScheduleClientBaseUrl": "http://game-gamerounds-schedule:9090/",
-        "GameInterfaceClientBaseUrl": "dns:///game-gameinterface-awc-service:9090/"
+  {
+    "Logging": {
+      "LogLevel": {
+        "Default": "Warning",
+        "Tgs.GameRecord.Awc.Messages": "Information"
       }
+    },
+    "GameRecordInfo": {
+      "GameProviderCode": "AWC",
+      "GameProviderCodes": [
+        "AWC_COCKFIGHT",
+        "AWC_FS",
+        "AWC_KM",
+        "AWC_LUDO",
+        "AWC_PGS",
+        "AWC_RCB",
+        "AWC_SG",
+        "AWC_SPADE",
+        "AWC_VENUS",
+        "AWC_YL",
+        "AWC_YESBINGO",
+        "AWC_BG"
+      ],
+      "GameProviderHangfire": "awc-schedule:hangfire:",
+      "IntervalMinutes": 5,
+      "IntervalMinutesMax": 60,
+      "IntervalMinutesMinimum": 1
+    },
+    "GameRecord": {
+      "GameCommandClientBaseUrl": "http://game-gamecommand/",
+      "GameInterfaceClientBaseUrl": "http://game-gameinterface-awc:9090/"
     }
+  }
   otel-collector-config.yaml: |
     receivers:
       otlp:

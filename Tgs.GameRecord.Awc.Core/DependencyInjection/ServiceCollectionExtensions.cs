@@ -1,8 +1,7 @@
 ﻿using System.Reflection;
 using Tgs.GameCommand.Client;
-using Tgs.GameInterface.AwcService.Client;
+using Tgs.GameInterface.Awc.Client;
 using Tgs.GameRecord.Awc.Core;
-using Tgs.GameRounds.Schedule.Client;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -13,8 +12,7 @@ public static class ServiceCollectionExtensions
         Action<RedisOptions, IServiceProvider> redisDBconfigure,
         Action<GameRecordInfoOptions, IServiceProvider> gameRecordInfoOptions,
         Action<GameCommandClientOptions, IServiceProvider> gameCommandClientOptions,
-        Action<GameRoundsScheduleClientOptions, IServiceProvider> gameRoundsScheduleClientOptions,
-        Action<GameInterfaceAwcServiceClientOptions, IServiceProvider> gameInterfaceAwcServiceClientOptions)
+        Action<GameInterfaceAwcClientOptions, IServiceProvider> gameInterfaceAwcClientOptions)
         => services
         .AddOptions<RedisOptions>()
         .Configure(redisDBconfigure)
@@ -27,13 +25,9 @@ public static class ServiceCollectionExtensions
             ServiceLifetime.Transient)
         .AddSingleton<RedisConnectionManager>()
         .AddGameCommandClient(gameCommandClientOptions)
-        .AddGameRoundsScheduleClient(gameRoundsScheduleClientOptions)
-        .AddGameInterfaceAwcServiceClient(gameInterfaceAwcServiceClientOptions)
+        .AddGameInterfaceAwcClient(gameInterfaceAwcClientOptions)
         .AddGameRecordHandleClient()
         .AddTransient<IHangfireUtensil, HangfireUtensil>()
-        .AddSingleton<IGameRecordManualFactory, GameRecordManualFactory>()
-        .AddSingleton<IGameRecordScheduleFactory, GameRecordScheduleFactory>()
-        .AddSingleton<IScheduleFormDispatcher, ScheduleFormDispatcher>()
-        .AddSingleton<IScheduleFormLock>(sp => ActivatorUtilities.CreateInstance<ScheduleFormLock>(sp, sp.GetRequiredService<RedisConnectionManager>().Database))
-        .AddSingleton<IUtensil, UtensilRepository>();
+        .AddSingleton<IGameRecordManualDispatcher, GameRecordManualDispatcher>()
+        .AddSingleton<IGameRecordScheduleDispatcher, GameRecordScheduleDispatcher>();
 }

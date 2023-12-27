@@ -1,46 +1,39 @@
 ﻿using Microsoft.Extensions.Logging;
-using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameInterface.AwcService.Protos;
+using Tgs.GameInterface.Awc.Client;
+using Tgs.GameInterface.Awc.Protos;
 using Tgs.GameRecord.Awc.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ScheduleWorkerServices;
 
 internal class AwcYesbingoWorkerService(
-    IGameInterfaceAwcRecordServiceClient client,
     ILogger<AwcYesbingoWorkerService> logger,
-    ICommandService<GamePullRecordCommand> pullRecordCommandService) : ICommandService<AwcYesbingoCommand>
+    IGameInterfaceAwcRecordClient client,
+    ICommandService<PullRecordCommand> service) : ICommandService<AwcYesbingoCommand>
 {
     public async ValueTask ExecuteAsync(AwcYesbingoCommand command, CancellationToken cancellationToken = default)
     {
-        var gamePullRecordReply = await client.GamePullRecordByAwcYesbingoAsync(
-            apiUrl: command.GameRecordApiUrl,
-            agentId: command.GameProviderAgentId,
-            cert: command.GameProviderCert,
+        var infos = await client.GamePullRecordByAwcYesbingoAsync(
+            apiUrl: command.ApiUrl,
+            agentId: command.AgentId,
+            cert: command.Cert,
             time_from: command.StartTime,
             cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+            .ToArrayAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? Enumerable.Empty<GameWagerInfo>();
 
-        if (gamePullRecordReply is null)
-        {
-            logger.LogError("LogOn:{logOn} Message: This Reply is null.({command})", DateTime.Now.ToString("o"), command);
-            return;
-        }
-
-        var records = gamePullRecordReply.Items ?? Enumerable.Empty<GamePullRecord>();
-
-        if (!records.Any())
+        if (!infos.Any())
         {
             logger.LogInformation("LogOn:{logOn} Message: The records are empty.({command})", DateTime.Now.ToString("o"), command);
             return;
         }
 
-        var recordCommand = new GamePullRecordCommand(
-            GameProviderCode: command.GameProviderCode,
-            Records: records);
-
-        await pullRecordCommandService.ExecuteAsync(
-            command: recordCommand,
+        await service.ExecuteAsync(
+            command: new PullRecordCommand(
+                GameProviderCode: command.GameProviderCode,
+                Infos: infos),
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }

@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameInterface.AwcService.Protos;
+using Tgs.GameInterface.Awc.Client;
 using Tgs.GameRecord.Awc.Core.ApplicationServices;
 using Tgs.GameRecord.Awc.Core.ScheduleWorkerServices;
 using Tgs.ServiceUtility;
@@ -16,37 +16,30 @@ public class AwcYesbingoWorkerServiceUnitTest
     public async Task Normal_Process()
     {
         var fakeLogger = NullLogger<AwcYesbingoWorkerService>.Instance;
-        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
-        var fakePullRecordCommandService = Substitute.For<ICommandService<GamePullRecordCommand>>();
+        var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
+        var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
 
         var command = new AwcYesbingoCommand(
-            GameRecordApiUrl: new("http://localhost/"),
+            ApiUrl: new("http://localhost/"),
             GameProviderCode: "AWC_YESBINGO",
-            GameProviderAgentId: "testAgentId",
-            GameProviderCert: "testCert",
+            AgentId: "testAgentId",
+            Cert: "testCert",
             StartTime: DateTime.UtcNow.AddMinutes(-1));
 
-        var gamePullRecordReply = new GamePullRecordReply();
-        _ = fakeClient
-            .GamePullRecordByAwcYesbingoAsync(
-                Arg.Is(command.GameRecordApiUrl),
-                Arg.Is(command.GameProviderAgentId),
-                Arg.Is(command.GameProviderCert),
-                Arg.Any<DateTimeOffset>()).Returns(gamePullRecordReply);
-
         var service = new AwcYesbingoWorkerService(
-            fakeClient,
             fakeLogger,
-            fakePullRecordCommandService);
+            fakeClient,
+            fakeService);
 
         await service.ExecuteAsync(command);
 
         _ = fakeClient
             .Received(1)
             .GamePullRecordByAwcYesbingoAsync(
-                Arg.Is(command.GameRecordApiUrl),
-                Arg.Is(command.GameProviderAgentId),
-                Arg.Is(command.GameProviderCert),
-                Arg.Any<DateTimeOffset>());
+            apiUrl: Arg.Is(command.ApiUrl),
+            agentId: Arg.Is(command.AgentId),
+            cert: Arg.Is(command.Cert),
+            time_from: Arg.Any<DateTimeOffset>(),
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 }

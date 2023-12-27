@@ -1,6 +1,6 @@
 variables:
   ImageName: pgtgs/game-gamerecord-awc
-  SettingKey: game-gamerecord-awc
+  TgsSettingKey: game-gamerecord-awc
   HelmTemplateFolderName: game-gamerecord-awc
   BuildCacheKey: Tgs.GameRecord.Awc.$CI_PIPELINE_ID
 
@@ -19,20 +19,20 @@ stages:
 build-code:
   stage: build
   script:
-    - dotnet build -c $BUILD_CONFIGURATION
+    - dotnet build -c $BuildConfiguration
   only:
     - merge_requests
     - main
   cache:
     key: $BuildCacheKey
-    untracked: true
+    untracked: true 
 
 unit-test:
   stage: test
   variables:
     DOTNET_USE_POLLING_FILE_WATCHER: "true"
   script:
-    - dotnet test -c $BUILD_CONFIGURATION -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
   needs:
     - build-code
   only:
@@ -59,14 +59,20 @@ push-docker-image:
     untracked: true   
     policy: pull
   script:
-    #- dotnet build "Tgs.GameRecord.Awc/Tgs.GameRecord.Awc.csproj" -c $BUILD_CONFIGURATION -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
-    - docker build -t "$ImageName:$Tag" --build-arg [BUILD_CONFIGURATION]=$BUILD_CONFIGURATION -f "Tgs.GameRecord.Awc/Dockerfile" . --no-cache
+    #- dotnet build "Tgs.GameRecord.Awc/Tgs.GameRecord.Awc.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
+    - dotnet publish "Tgs.GameRecord.Awc" 
+       --os linux --arch x64
+       /t:PublishContainer
+       -c $BuildConfiguration
+       /p:ContainerRepository=$ImageName
+       /p:ContainerImageTag=$Tag
     - docker push $ImageName:$Tag
 
 push-k8s-template:
   stage: publish
   needs:
     - unit-test
+    - push-docker-image
   only:
     - main
   script:
@@ -101,10 +107,10 @@ deploy-dev:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_dev
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingKey})
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingKey})
+    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$TgsSettingKey})
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
@@ -148,10 +154,10 @@ deploy-staging:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_staging
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingKey})
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingKey})
+    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$TgsSettingKey})
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \
@@ -195,10 +201,10 @@ deploy-prod:
   before_script:
     - export KUBECONFIG=$KubeConfig_Raypro_prod
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$SettingKey})
+    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
     - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
     - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$SettingKey})
+    - export autoscaling=$(kubectl get cm autoscaling-setting -o jsonpath={.data.$TgsSettingKey})
     - |
       cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
         -n $namespace \

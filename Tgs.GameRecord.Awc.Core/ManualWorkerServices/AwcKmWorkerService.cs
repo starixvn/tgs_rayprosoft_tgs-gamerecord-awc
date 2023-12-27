@@ -1,30 +1,34 @@
-﻿using Tgs.GameInterface.AwcService.Client;
+﻿using Tgs.GameInterface.Awc.Client;
+using Tgs.GameInterface.Awc.Protos;
 using Tgs.GameRecord.Awc.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
 internal class AwcKmWorkerService(
-    IGameInterfaceAwcRecordServiceClient client,
-    ICommandService<GameSettleCommand> settleCommandService) : ICommandService<AwcKmCommand>
+    IGameInterfaceAwcRecordClient client,
+    ICommandService<PullRecordCommand> service) : ICommandService<AwcKmCommand>
 {
     public async ValueTask ExecuteAsync(AwcKmCommand command, CancellationToken cancellationToken = default)
     {
-        var gameSettle = await client.GameSettleByAwcKmAsync(
-            apiUrl: command.GameRecordApiUrl,
-            agentId: command.GameProviderAgentId,
-            cert: command.GameProviderCert,
+        var infos = await client.GameSettleByAwcKmAsync(
+            apiUrl: command.ApiUrl,
+            agentId: command.AgentId,
+            cert: command.Cert,
             startTime: command.StartTime,
             endTime: command.EndTime,
             cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+            .ToArrayAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? Enumerable.Empty<GameWagerInfo>();
 
-        if (gameSettle.Items.Count != 0)
+        if (infos.Any())
         {
-            await settleCommandService.ExecuteAsync(
-                command: new GameSettleCommand(
+            await service.ExecuteAsync(
+                command: new PullRecordCommand(
                     GameProviderCode: command.GameProviderCode,
-                    Records: gameSettle.Items),
+                    Infos: infos),
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }

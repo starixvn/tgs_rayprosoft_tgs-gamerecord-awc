@@ -1,4 +1,4 @@
-﻿using Tgs.GameInterface.AwcService.Client;
+﻿using Tgs.GameInterface.Awc.Client;
 using Tgs.GameRecord.Awc.Core;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -12,21 +12,6 @@ public static class ServiceRegisterExtensions
             var sp = scope.ServiceProvider;
             var hangfireSchedule = scope.ServiceProvider.GetRequiredService<IHangfireUtensil>();
             await hangfireSchedule.JobInitAsync().ConfigureAwait(false);
-        }
-
-        return app;
-    }
-
-    public static async Task<WebApplication> UseRegisterAsync(this WebApplication app)
-    {
-        using (var scope = app.Services.CreateScope())
-        {
-            var gameInterfaceAwcServiceClient = scope.ServiceProvider.GetRequiredService<IGameInterfaceAwcServiceClient>();
-
-            _ = await gameInterfaceAwcServiceClient
-                 .CheckingServiceAsync(
-                    machineName: Environment.MachineName)
-                 .ConfigureAwait(false);
         }
 
         return app;

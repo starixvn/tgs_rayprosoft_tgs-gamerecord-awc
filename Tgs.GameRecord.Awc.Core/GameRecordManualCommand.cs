@@ -1,9 +1,9 @@
 ﻿namespace Tgs.GameRecord.Awc.Core;
 
 public record GameRecordManualCommand(
-    Uri GameRecordApiUrl,
     string GameProviderCode,
-    string GameProviderAgentId,
-    string GameProviderCert,
+    Uri ApiUrl,
+    string AgentId,
+    string Cert,
     DateTimeOffset StartTime,
     DateTimeOffset EndTime);

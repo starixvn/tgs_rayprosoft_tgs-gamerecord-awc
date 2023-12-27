@@ -1,32 +1,34 @@
-﻿using Tgs.GameInterface.AwcService.Client;
+﻿using Tgs.GameInterface.Awc.Client;
+using Tgs.GameInterface.Awc.Protos;
 using Tgs.GameRecord.Awc.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
 internal class AwcFacaiWorkerService(
-    IGameInterfaceAwcRecordServiceClient client,
-    ICommandService<GameSettleCommand> settleCommandService) : ICommandService<AwcFacaiCommand>
+    IGameInterfaceAwcRecordClient client,
+    ICommandService<PullRecordCommand> service) : ICommandService<AwcFacaiCommand>
 {
     public async ValueTask ExecuteAsync(AwcFacaiCommand command, CancellationToken cancellationToken = default)
     {
-        var gameSettle = await client.GameSettleByAwcFacaiAsync(
-            apiUrl: command.GameRecordApiUrl,
-            agentId: command.GameProviderAgentId,
-            cert: command.GameProviderCert,
+        var infos = await client.GameSettleByAwcFacaiAsync(
+            apiUrl: command.ApiUrl,
+            agentId: command.AgentId,
+            cert: command.Cert,
             startTime: command.StartTime,
             endTime: command.EndTime,
             cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+            .ToArrayAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false)
+            ?? Enumerable.Empty<GameWagerInfo>();
 
-        if (gameSettle.Items.Count != 0)
+        if (infos.Any())
         {
-            var recordCommand = new GameSettleCommand(
-                GameProviderCode: command.GameProviderCode,
-                Records: gameSettle.Items);
-
-            await settleCommandService.ExecuteAsync(
-                command: recordCommand,
+            await service.ExecuteAsync(
+                command: new PullRecordCommand(
+                    GameProviderCode: command.GameProviderCode,
+                    Infos: infos),
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }

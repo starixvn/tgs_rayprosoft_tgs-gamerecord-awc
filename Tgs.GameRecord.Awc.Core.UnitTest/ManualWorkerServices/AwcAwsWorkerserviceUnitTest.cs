@@ -1,43 +1,44 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using NSubstitute;
-using Tgs.GameInterface.AwcService.Client;
-using Tgs.GameInterface.AwcService.Protos;
+using Tgs.GameInterface.Awc.Client;
 using Tgs.GameRecord.Awc.Core.ApplicationServices;
 using Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameRecord.Awc.Core.UnitTest.ManualWorkerServices;
 
-public class AwcAwsWorkerserviceUnitTest
+public class AwcAwsWorkerServiceUnitTest
 {
     [Fact]
     public async Task Normal_Process()
     {
-        var fakeClient = Substitute.For<IGameInterfaceAwcRecordServiceClient>();
-        var fakeSettleCommandService = Substitute.For<ICommandService<GameSettleCommand>>();
+        var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
+        var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
 
         var command = new AwcAwsCommand(
-            GameRecordApiUrl: new("http://localhost/"),
-            GameProviderCode: "AWC_PGS",
-            GameProviderAgentId: "testAgentId",
-            GameProviderCert: "testCert",
+            ApiUrl: new("http://localhost/"),
+            GameProviderCode: "AWC_AWS",
+            AgentId: "testAgentId",
+            Cert: "testCert",
             StartTime: DateTime.UtcNow.AddMinutes(-1),
             EndTime: DateTime.UtcNow);
 
-        var gameSettle = new GameSettleRecordReply();
-        _ = fakeClient
-            .GameSettleByAwcAwsAsync(
-                Arg.Is(command.GameRecordApiUrl),
-                Arg.Is(command.GameProviderAgentId),
-                Arg.Is(command.GameProviderCert),
-                Arg.Any<DateTimeOffset>(),
-                Arg.Any<DateTimeOffset>()).Returns(gameSettle);
-
-        var service = new AwcAwsWorkerservice(
+        var service = new AwcAwsWorkerService(
             fakeClient,
-            fakeSettleCommandService);
+            fakeService);
 
         await service.ExecuteAsync(command);
+
+        _ = fakeClient
+            .Received(1)
+            .GameSettleByAwcAwsAsync(
+            apiUrl: Arg.Is(command.ApiUrl),
+            agentId: Arg.Is(command.AgentId),
+            cert: Arg.Is(command.Cert),
+            startTime: Arg.Any<DateTimeOffset>(),
+            endTime: Arg.Any<DateTimeOffset>(),
+            cancellationToken: Arg.Any<CancellationToken>());
     }
 }
