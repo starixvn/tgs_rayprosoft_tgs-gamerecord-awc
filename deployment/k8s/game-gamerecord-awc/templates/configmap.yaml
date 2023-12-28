@@ -28,7 +28,8 @@ data:
           "AWC_YESBINGO",
           "AWC_BG"
         ],
-        "GameProviderHangfire": "awc-schedule:hangfire:",
+        "HangfirePrefix": "awc-schedule:hangfire:",
+        "HangfireLocking": "awc-locking:hangfire:",
         "IntervalMinutes": 5,
         "IntervalMinutesMax": 60,
         "IntervalMinutesMinimum": 1
