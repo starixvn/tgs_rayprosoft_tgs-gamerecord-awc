@@ -1,4 +1,5 @@
-﻿namespace Tgs.GameRecord.Awc.Core;
+﻿using Tgs.GameRecord.Awc.Core;
+namespace Tgs.GameRecord.Awc;
 
 public record RedisOptions
 {

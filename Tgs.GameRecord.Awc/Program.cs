@@ -59,7 +59,7 @@ builder.Services.AddHangfire((sp, config) =>
     var gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>()!;
     var options = new RedisStorageOptions
     {
-        Prefix = gameRecordInfo.GameProviderHangfire
+        Prefix = gameRecordInfo.HangfirePrefix
     };
     _ = config
     .UseRedisStorage(connectionString, options)
@@ -67,7 +67,7 @@ builder.Services.AddHangfire((sp, config) =>
 })
     .AddHangfireServer();
 
-builder.Services.AddAwcServiceCore(
+builder.Services.AddGameRecord(
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
