@@ -52,19 +52,20 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Learn more about configuring Hangfire
-builder.Services.AddHangfire((sp, config) =>
-{
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    var connectionString = builder.Configuration.GetConnectionString("redis")!;
-    var gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>()!;
-    var options = new RedisStorageOptions
+builder.Services.AddHangfire(
+    (sp, config) =>
     {
-        Prefix = gameRecordInfo.HangfirePrefix
-    };
-    _ = config
-    .UseRedisStorage(connectionString, options)
-    .UseConsole();
-})
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        var connectionString = builder.Configuration.GetConnectionString("redis")!;
+        var gameRecordInfo = builder.Configuration.GetSection("GameRecordInfo").Get<GameRecordInfoOptions>()!;
+        var options = new RedisStorageOptions
+        {
+            Prefix = gameRecordInfo.HangfirePrefix
+        };
+        _ = config
+        .UseRedisStorage(connectionString, options)
+        .WithJobExpirationTimeout(TimeSpan.FromMinutes(30));
+    })
     .AddHangfireServer();
 
 builder.Services.AddGameRecord(
