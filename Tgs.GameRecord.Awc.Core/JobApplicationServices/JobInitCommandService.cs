@@ -16,6 +16,12 @@ internal class JobInitCommandService(
     IHangfireLock hangfireLock,
     IGameCommandClient client) : ICommandService<JobInitCommand>
 {
+    private readonly GameRecordInfoOptions _gameRecordInfo = options.Value;
+    private readonly RecurringJobOptions _recurringJobOptions = new()
+    {
+        TimeZone = TimeZoneInfo.FindSystemTimeZoneById(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "China Standard Time" : "Asia/Shanghai")
+    };
+
     public async ValueTask ExecuteAsync(JobInitCommand command, CancellationToken cancellationToken = default)
     {
         try
@@ -37,7 +43,7 @@ internal class JobInitCommandService(
                 }
             }
 
-            foreach (var gameProviderCode in options.Value.GameProviderCodes)
+            foreach (var gameProviderCode in _gameRecordInfo.GameProviderCodes)
             {
                 var gameProviderConfiguration = $"{gameProviderCode}Configuration";
                 var settingConfiguration = await client
@@ -87,7 +93,7 @@ internal class JobInitCommandService(
                         ?? settingConfigurationJson["agentId"]?.ToString()
                         ?? throw new Exception($"Required parameters(agentId)");
                     var cert = configurationDataJson["cert"]?.ToString()
-                         ?? settingConfigurationJson["cert"]?.ToString()
+                        ?? settingConfigurationJson["cert"]?.ToString()
                         ?? throw new Exception($"Required parameters(cert)");
 
                     if (gameProviderAgentMapper.ContainsKey(agentId))
@@ -110,10 +116,7 @@ internal class JobInitCommandService(
                         recurringJobId: recurringJobId,
                         methodCall: service => service.JobExecuteAsync(jobExecuteCommand),
                         cronExpression: Cron.Minutely(),
-                        options: new RecurringJobOptions()
-                        {
-                            TimeZone = TimeZoneInfo.FindSystemTimeZoneById(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "China Standard Time" : "Asia/Shanghai")
-                        });
+                        options: _recurringJobOptions);
 
                     //初始化強制第一次處理
                     _ = BackgroundJob.Enqueue<IHangfireUtensil>(service => service.JobExecuteAsync(jobExecuteCommand));
