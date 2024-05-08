@@ -12,34 +12,34 @@ namespace Tgs.GameRecord.Awc.Core.UnitTest.ScheduleWorkerServices;
 
 public class AwcPgsWorkerServiceUnitTest
 {
-    [Fact]
-    public async Task Normal_Process()
-    {
-        var fakeLogger = NullLogger<AwcPgsWorkerService>.Instance;
-        var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
-        var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
+	[Fact]
+	public async Task Normal_Process()
+	{
+		var fakeLogger = NullLogger<AwcPgsWorkerService>.Instance;
+		var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
+		var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
 
-        var command = new AwcPgsCommand(
-            ApiUrl: new("http://localhost/"),
-            GameProviderCode: "AWC_PGS",
-            AgentId: "testAgentId",
-            Cert: "testCert",
-            StartTime: DateTime.UtcNow.AddMinutes(-1));
+		var command = new AwcPgsCommand(
+			ApiUrl: new("http://localhost/"),
+			GameProviderCode: "AWC_PGS",
+			AgentId: "testAgentId",
+			Cert: "testCert",
+			StartTime: DateTime.UtcNow.AddMinutes(-1));
 
-        var service = new AwcPgsWorkerService(
-            fakeLogger,
-            fakeClient,
-            fakeService);
+		var service = new AwcPgsWorkerService(
+			fakeLogger,
+			fakeClient,
+			fakeService);
 
-        await service.ExecuteAsync(command);
+		await service.ExecuteAsync(command);
 
-        _ = fakeClient
-            .Received(1)
-            .GamePullRecordByAwcPgsAsync(
-            apiUrl: Arg.Is(command.ApiUrl),
-            agentId: Arg.Is(command.AgentId),
-            cert: Arg.Is(command.Cert),
-            time_from: Arg.Any<DateTimeOffset>(),
-            cancellationToken: Arg.Any<CancellationToken>());
-    }
+		_ = fakeClient
+			.Received(1)
+			.GamePullRecordByAwcPgsAsync(
+			apiUrl: Arg.Is(command.ApiUrl),
+			agentId: Arg.Is(command.AgentId),
+			cert: Arg.Is(command.Cert),
+			time_from: Arg.Any<DateTimeOffset>(),
+			cancellationToken: Arg.Any<CancellationToken>());
+	}
 }

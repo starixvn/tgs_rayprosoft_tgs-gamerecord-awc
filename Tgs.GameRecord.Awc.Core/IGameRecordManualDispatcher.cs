@@ -2,5 +2,5 @@
 
 public interface IGameRecordManualDispatcher
 {
-    ValueTask ExecuteAsync(GameRecordManualCommand command, CancellationToken cancellationToken = default);
+	ValueTask ExecuteAsync(GameRecordManualCommand command, CancellationToken cancellationToken = default);
 }

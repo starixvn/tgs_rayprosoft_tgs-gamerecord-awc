@@ -9,7 +9,8 @@ data:
       "Logging": {
         "LogLevel": {
           "Default": "Warning",
-          "Tgs.GameRecord.Awc.Messages": "Information"
+          "Tgs.GameRecord.Awc.Messages": "Information",
+          "Tgs.GameRecord.Awc.Core.ApplicationServices.HandleRecordCommandService": "Information"
         }
       },
       "GameRecordInfo": {
@@ -23,7 +24,6 @@ data:
           "AWC_RCB",
           "AWC_SG",
           "AWC_SPADE",
-          "AWC_VENUS",
           "AWC_YL",
           "AWC_YESBINGO",
           "AWC_BG"

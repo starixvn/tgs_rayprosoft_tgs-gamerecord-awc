@@ -1,7 +1,6 @@
-﻿using Tgs.GameRecord.Awc.Core;
-namespace Tgs.GameRecord.Awc;
+﻿namespace Tgs.GameRecord.Awc;
 
 public record RedisOptions
 {
-    public string ConnectionString { get; set; } = "localhost";
+	public string ConnectionString { get; set; } = "localhost";
 }

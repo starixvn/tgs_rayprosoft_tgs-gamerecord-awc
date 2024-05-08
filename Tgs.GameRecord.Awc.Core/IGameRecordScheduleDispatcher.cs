@@ -2,5 +2,5 @@
 
 public interface IGameRecordScheduleDispatcher
 {
-    ValueTask ExecuteAsync(GameRecordScheduleCommand command, CancellationToken cancellationToken = default);
+	ValueTask ExecuteAsync(GameRecordScheduleCommand command, CancellationToken cancellationToken = default);
 }

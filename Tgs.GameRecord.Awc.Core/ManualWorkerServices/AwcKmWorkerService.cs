@@ -6,31 +6,31 @@ using Tgs.ServiceUtility;
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
 internal class AwcKmWorkerService(
-    IGameInterfaceAwcRecordClient client,
-    ICommandService<PullRecordCommand> service) : ICommandService<AwcKmCommand>
+	IGameInterfaceAwcRecordClient client,
+	ICommandService<PullRecordCommand> service) : ICommandService<AwcKmCommand>
 {
-    public async ValueTask ExecuteAsync(AwcKmCommand command, CancellationToken cancellationToken = default)
-    {
-        var infos = await client.GameSettleByAwcKmAsync(
-            apiUrl: command.ApiUrl,
-            agentId: command.AgentId,
-            cert: command.Cert,
-            startTime: command.StartTime,
-            endTime: command.EndTime,
-            cancellationToken: cancellationToken)
-            .ToArrayAsync(
-            cancellationToken: cancellationToken)
-            .ConfigureAwait(false)
-            ?? Enumerable.Empty<GameWagerInfo>();
+	public async ValueTask ExecuteAsync(AwcKmCommand command, CancellationToken cancellationToken = default)
+	{
+		var infos = await client.GameSettleByAwcKmAsync(
+			apiUrl: command.ApiUrl,
+			agentId: command.AgentId,
+			cert: command.Cert,
+			startTime: command.StartTime,
+			endTime: command.EndTime,
+			cancellationToken: cancellationToken)
+			.ToArrayAsync(
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false)
+			?? Enumerable.Empty<GameWagerInfo>();
 
-        if (infos.Any())
-        {
-            await service.ExecuteAsync(
-                command: new PullRecordCommand(
-                    GameProviderCode: command.GameProviderCode,
-                    Infos: infos),
-                cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-        }
-    }
+		if (infos.Any())
+		{
+			await service.ExecuteAsync(
+				command: new PullRecordCommand(
+					GameProviderCode: command.GameProviderCode,
+					Infos: infos),
+				cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+		}
+	}
 }

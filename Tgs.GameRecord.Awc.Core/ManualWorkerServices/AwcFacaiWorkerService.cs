@@ -6,31 +6,31 @@ using Tgs.ServiceUtility;
 namespace Tgs.GameRecord.Awc.Core.ManualWorkerServices;
 
 internal class AwcFacaiWorkerService(
-    IGameInterfaceAwcRecordClient client,
-    ICommandService<PullRecordCommand> service) : ICommandService<AwcFacaiCommand>
+	IGameInterfaceAwcRecordClient client,
+	ICommandService<PullRecordCommand> service) : ICommandService<AwcFacaiCommand>
 {
-    public async ValueTask ExecuteAsync(AwcFacaiCommand command, CancellationToken cancellationToken = default)
-    {
-        var infos = await client.GameSettleByAwcFacaiAsync(
-            apiUrl: command.ApiUrl,
-            agentId: command.AgentId,
-            cert: command.Cert,
-            startTime: command.StartTime,
-            endTime: command.EndTime,
-            cancellationToken: cancellationToken)
-            .ToArrayAsync(
-            cancellationToken: cancellationToken)
-            .ConfigureAwait(false)
-            ?? Enumerable.Empty<GameWagerInfo>();
+	public async ValueTask ExecuteAsync(AwcFacaiCommand command, CancellationToken cancellationToken = default)
+	{
+		var infos = await client.GameSettleByAwcFacaiAsync(
+			apiUrl: command.ApiUrl,
+			agentId: command.AgentId,
+			cert: command.Cert,
+			startTime: command.StartTime,
+			endTime: command.EndTime,
+			cancellationToken: cancellationToken)
+			.ToArrayAsync(
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false)
+			?? Enumerable.Empty<GameWagerInfo>();
 
-        if (infos.Any())
-        {
-            await service.ExecuteAsync(
-                command: new PullRecordCommand(
-                    GameProviderCode: command.GameProviderCode,
-                    Infos: infos),
-                cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-        }
-    }
+		if (infos.Any())
+		{
+			await service.ExecuteAsync(
+				command: new PullRecordCommand(
+					GameProviderCode: command.GameProviderCode,
+					Infos: infos),
+				cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+		}
+	}
 }

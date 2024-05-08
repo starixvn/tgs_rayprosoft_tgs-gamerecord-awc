@@ -3,5 +3,5 @@
 namespace Tgs.GameRecord.Awc.Core.ApplicationServices;
 
 public record HandleRecordCommand(
-    string GameProviderCode,
-    GameWagerInfo Info);
+	string GameProviderCode,
+	GameWagerInfo Info);

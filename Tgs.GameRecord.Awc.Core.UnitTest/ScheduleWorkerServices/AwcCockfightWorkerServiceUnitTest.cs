@@ -12,34 +12,34 @@ namespace Tgs.GameRecord.Awc.Core.UnitTest.ScheduleWorkerServices;
 
 public class AwcCockfightWorkerServiceUnitTest
 {
-    [Fact]
-    public async Task Normal_Process()
-    {
-        var fakeLogger = NullLogger<AwcCockfightWorkerService>.Instance;
-        var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
-        var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
+	[Fact]
+	public async Task Normal_Process()
+	{
+		var fakeLogger = NullLogger<AwcCockfightWorkerService>.Instance;
+		var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
+		var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
 
-        var command = new AwcCockfightCommand(
-            ApiUrl: new("http://localhost/"),
-            GameProviderCode: "AWC_COCKFIGHT",
-            AgentId: "testAgentId",
-            Cert: "testCert",
-            StartTime: DateTime.UtcNow.AddMinutes(-1));
+		var command = new AwcCockfightCommand(
+			ApiUrl: new("http://localhost/"),
+			GameProviderCode: "AWC_COCKFIGHT",
+			AgentId: "testAgentId",
+			Cert: "testCert",
+			StartTime: DateTime.UtcNow.AddMinutes(-1));
 
-        var service = new AwcCockfightWorkerService(
-            fakeLogger,
-            fakeClient,
-            fakeService);
+		var service = new AwcCockfightWorkerService(
+			fakeLogger,
+			fakeClient,
+			fakeService);
 
-        await service.ExecuteAsync(command);
+		await service.ExecuteAsync(command);
 
-        _ = fakeClient
-            .Received(1)
-            .GamePullRecordByAwcCockfightAsync(
-            apiUrl: Arg.Is(command.ApiUrl),
-            agentId: Arg.Is(command.AgentId),
-            cert: Arg.Is(command.Cert),
-            time_from: Arg.Any<DateTimeOffset>(),
-            cancellationToken: Arg.Any<CancellationToken>());
-    }
+		_ = fakeClient
+			.Received(1)
+			.GamePullRecordByAwcCockfightAsync(
+			apiUrl: Arg.Is(command.ApiUrl),
+			agentId: Arg.Is(command.AgentId),
+			cert: Arg.Is(command.Cert),
+			time_from: Arg.Any<DateTimeOffset>(),
+			cancellationToken: Arg.Any<CancellationToken>());
+	}
 }

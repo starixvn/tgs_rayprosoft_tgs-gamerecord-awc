@@ -11,34 +11,34 @@ namespace Tgs.GameRecord.Awc.Core.UnitTest.ManualWorkerServices;
 
 public class AwcVenusWorkerServiceUnitTest
 {
-    [Fact]
-    public async Task Normal_Process()
-    {
-        var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
-        var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
+	[Fact]
+	public async Task Normal_Process()
+	{
+		var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
+		var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
 
-        var command = new AwcVenusCommand(
-            ApiUrl: new("http://localhost/"),
-            GameProviderCode: "AWC_VENUS",
-            AgentId: "testAgentId",
-            Cert: "testCert",
-            StartTime: DateTime.UtcNow.AddMinutes(-1),
-            EndTime: DateTime.UtcNow);
+		var command = new AwcVenusCommand(
+			ApiUrl: new("http://localhost/"),
+			GameProviderCode: "AWC_VENUS",
+			AgentId: "testAgentId",
+			Cert: "testCert",
+			StartTime: DateTime.UtcNow.AddMinutes(-1),
+			EndTime: DateTime.UtcNow);
 
-        var service = new AwcVenusWorkerService(
-            fakeClient,
-            fakeService);
+		var service = new AwcVenusWorkerService(
+			fakeClient,
+			fakeService);
 
-        await service.ExecuteAsync(command);
+		await service.ExecuteAsync(command);
 
-        _ = fakeClient
-            .Received(1)
-            .GameSettleByAwcVenusAsync(
-            apiUrl: Arg.Is(command.ApiUrl),
-            agentId: Arg.Is(command.AgentId),
-            cert: Arg.Is(command.Cert),
-            startTime: Arg.Any<DateTimeOffset>(),
-            endTime: Arg.Any<DateTimeOffset>(),
-            cancellationToken: Arg.Any<CancellationToken>());
-    }
+		_ = fakeClient
+			.Received(1)
+			.GameSettleByAwcVenusAsync(
+			apiUrl: Arg.Is(command.ApiUrl),
+			agentId: Arg.Is(command.AgentId),
+			cert: Arg.Is(command.Cert),
+			startTime: Arg.Any<DateTimeOffset>(),
+			endTime: Arg.Any<DateTimeOffset>(),
+			cancellationToken: Arg.Any<CancellationToken>());
+	}
 }

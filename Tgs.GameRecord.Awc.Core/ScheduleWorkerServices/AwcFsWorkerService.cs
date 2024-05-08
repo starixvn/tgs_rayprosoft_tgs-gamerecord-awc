@@ -7,34 +7,34 @@ using Tgs.ServiceUtility;
 namespace Tgs.GameRecord.Awc.Core.ScheduleWorkerServices;
 
 internal class AwcFsWorkerService(
-    ILogger<AwcFsWorkerService> logger,
-    IGameInterfaceAwcRecordClient client,
-    ICommandService<PullRecordCommand> service) : ICommandService<AwcFsCommand>
+	ILogger<AwcFsWorkerService> logger,
+	IGameInterfaceAwcRecordClient client,
+	ICommandService<PullRecordCommand> service) : ICommandService<AwcFsCommand>
 {
-    public async ValueTask ExecuteAsync(AwcFsCommand command, CancellationToken cancellationToken = default)
-    {
-        var infos = await client.GamePullRecordByAwcFsAsync(
-            apiUrl: command.ApiUrl,
-            agentId: command.AgentId,
-            cert: command.Cert,
-            time_from: command.StartTime,
-            cancellationToken: cancellationToken)
-            .ToArrayAsync(
-            cancellationToken: cancellationToken)
-            .ConfigureAwait(false)
-            ?? Enumerable.Empty<GameWagerInfo>();
+	public async ValueTask ExecuteAsync(AwcFsCommand command, CancellationToken cancellationToken = default)
+	{
+		var infos = await client.GamePullRecordByAwcFsAsync(
+			apiUrl: command.ApiUrl,
+			agentId: command.AgentId,
+			cert: command.Cert,
+			time_from: command.StartTime,
+			cancellationToken: cancellationToken)
+			.ToArrayAsync(
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false)
+			?? Enumerable.Empty<GameWagerInfo>();
 
-        if (!infos.Any())
-        {
-            logger.LogInformation("LogOn:{logOn} Message: The records are empty.({command})", DateTime.Now.ToString("o"), command);
-            return;
-        }
+		if (!infos.Any())
+		{
+			logger.LogInformation("LogOn:{logOn} Message: The records are empty.({command})", DateTime.Now.ToString("o"), command);
+			return;
+		}
 
-        await service.ExecuteAsync(
-            command: new PullRecordCommand(
-                GameProviderCode: command.GameProviderCode,
-                Infos: infos),
-            cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-    }
+		await service.ExecuteAsync(
+			command: new PullRecordCommand(
+				GameProviderCode: command.GameProviderCode,
+				Infos: infos),
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+	}
 }

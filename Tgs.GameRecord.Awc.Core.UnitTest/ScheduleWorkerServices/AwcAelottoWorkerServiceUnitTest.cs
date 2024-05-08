@@ -12,34 +12,34 @@ namespace Tgs.GameRecord.Awc.Core.UnitTest.ScheduleWorkerServices;
 
 public class AwcAelottoWorkerServiceUnitTest
 {
-    [Fact]
-    public async Task Normal_Process()
-    {
-        var fakeLogger = NullLogger<AwcAelottoWorkerService>.Instance;
-        var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
-        var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
+	[Fact]
+	public async Task Normal_Process()
+	{
+		var fakeLogger = NullLogger<AwcAelottoWorkerService>.Instance;
+		var fakeClient = Substitute.For<IGameInterfaceAwcRecordClient>();
+		var fakeService = Substitute.For<ICommandService<PullRecordCommand>>();
 
-        var command = new AwcAelottoCommand(
-            ApiUrl: new("http://localhost/"),
-            GameProviderCode: "AWC_AELOTTO",
-            AgentId: "testAgentId",
-            Cert: "testCert",
-            StartTime: DateTime.UtcNow.AddMinutes(-1));
+		var command = new AwcAelottoCommand(
+			ApiUrl: new("http://localhost/"),
+			GameProviderCode: "AWC_AELOTTO",
+			AgentId: "testAgentId",
+			Cert: "testCert",
+			StartTime: DateTime.UtcNow.AddMinutes(-1));
 
-        var service = new AwcAelottoWorkerService(
-            fakeLogger,
-            fakeClient,
-            fakeService);
+		var service = new AwcAelottoWorkerService(
+			fakeLogger,
+			fakeClient,
+			fakeService);
 
-        await service.ExecuteAsync(command);
+		await service.ExecuteAsync(command);
 
-        _ = fakeClient
-            .Received(1)
-            .GamePullRecordByAwcAeLottoAsync(
-            apiUrl: Arg.Is(command.ApiUrl),
-            agentId: Arg.Is(command.AgentId),
-            cert: Arg.Is(command.Cert),
-            time_from: Arg.Any<DateTimeOffset>(),
-            cancellationToken: Arg.Any<CancellationToken>());
-    }
+		_ = fakeClient
+			.Received(1)
+			.GamePullRecordByAwcAeLottoAsync(
+			apiUrl: Arg.Is(command.ApiUrl),
+			agentId: Arg.Is(command.AgentId),
+			cert: Arg.Is(command.Cert),
+			time_from: Arg.Any<DateTimeOffset>(),
+			cancellationToken: Arg.Any<CancellationToken>());
+	}
 }
