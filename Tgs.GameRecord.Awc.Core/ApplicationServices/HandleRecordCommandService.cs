@@ -31,8 +31,8 @@ internal class HandleRecordCommandService(
 			settle = command.Info.Settle.ToDecimal().GetValueOrDefault(0);
 			turnover = command.Info.Turnover.ToDecimal().GetValueOrDefault(0);
 			winLoss = command.Info.WinLoss.ToDecimal().GetValueOrDefault(0);
-			betState = (isCashout) ? Handle.Common.Protos.BetState.Refund : (isCanceled) ? Handle.Common.Protos.BetState.Cancel : (isVoid) ? Handle.Common.Protos.BetState.Void : settle > 0 ? Handle.Common.Protos.BetState.Win : Handle.Common.Protos.BetState.Loss;
-			cashoutState = (isCashout) ? Handle.Common.Protos.CashoutState.Cashout : Handle.Common.Protos.CashoutState.None;
+			betState = isCashout ? Handle.Common.Protos.BetState.Refund : isCanceled ? Handle.Common.Protos.BetState.Cancel : isVoid ? Handle.Common.Protos.BetState.Void : settle > 0 ? Handle.Common.Protos.BetState.Win : Handle.Common.Protos.BetState.Loss;
+			cashoutState = isCashout ? Handle.Common.Protos.CashoutState.Cashout : Handle.Common.Protos.CashoutState.None;
 		}
 
 		var request = new Handle.Common.Protos.GameRecordHandleRequest
