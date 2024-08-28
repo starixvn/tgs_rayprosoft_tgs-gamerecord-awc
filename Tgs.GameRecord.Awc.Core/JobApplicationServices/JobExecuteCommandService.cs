@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -8,34 +9,25 @@ using Valhalla.MessageQueue;
 
 namespace Tgs.GameRecord.Awc.Core.JobApplicationServices;
 
-internal class JobExecuteCommandService : ICommandService<JobExecuteCommand>
+internal class JobExecuteCommandService(
+	ILogger<JobExecuteCommandService> logger,
+	IOptions<GameRecordInfoOptions> options,
+	TimeProvider timeProvider,
+	IMessageSender messageSender) : ICommandService<JobExecuteCommand>
 {
-	private readonly GameRecordInfoOptions _gameRecordInfo;
-	private readonly double _intervalMinutes;
-	private readonly ILogger<JobExecuteCommandService> _logger;
-	private readonly IMessageSender _messageSender;
-
-	public JobExecuteCommandService(
-		ILogger<JobExecuteCommandService> logger,
-		IOptions<GameRecordInfoOptions> options,
-		IMessageSender messageSender)
-	{
-		_gameRecordInfo = options.Value;
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		_messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
-		_intervalMinutes = _gameRecordInfo.IntervalMinutesMax < _gameRecordInfo.IntervalMinutes
-			? _gameRecordInfo.IntervalMinutesMax
-			: _gameRecordInfo.IntervalMinutesMinimum > _gameRecordInfo.IntervalMinutes
-			? _gameRecordInfo.IntervalMinutesMinimum
-			: _gameRecordInfo.IntervalMinutes;
-	}
+	private readonly double _intervalMinutes = options.Value.IntervalMinutesMax < options.Value.IntervalMinutes
+		? options.Value.IntervalMinutesMax
+		: options.Value.IntervalMinutesMinimum > options.Value.IntervalMinutes
+		? options.Value.IntervalMinutesMinimum
+		: options.Value.IntervalMinutes;
 
 	public ValueTask ExecuteAsync(JobExecuteCommand command, CancellationToken cancellationToken = default)
 	{
-		var endTime = DateTimeOffset.ParseExact(DateTimeOffset.UtcNow.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
+		var currentTime = timeProvider.GetUtcNow();
+		var endTime = DateTimeOffset.ParseExact(currentTime.ToString(@"yyyy-MM-dd\THH:mm:00K"), @"yyyy-MM-dd\THH:mm:ssK", null, styles: System.Globalization.DateTimeStyles.RoundtripKind);
 		var startTime = endTime.AddMinutes(_intervalMinutes * -1);
 
-		var parameters = new AwcGameRecordScheduleMessage
+		var message = new AwcGameRecordScheduleMessage
 		{
 			GameProviderCode = command.GameProviderCode,
 			ApiUrl = command.ApiUrl,
@@ -44,12 +36,24 @@ internal class JobExecuteCommandService : ICommandService<JobExecuteCommand>
 			StartTime = startTime
 		};
 
-		_logger.LogInformation("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), parameters);
+		logger.LogInformation("{logInformation}",
+			JsonSerializer.Serialize(new
+			{
+				LogOn = DateTime.Now.ToString("u"),
+				Subject = AwcNatsConst.SchedulePublish,
+				Data = new
+				{
+					message.ApiUrl,
+					message.AgentId,
+					message.Cert,
+					StartTime = message.StartTime.ToString("u"),
+				},
+				Message = "This message publishing handler."
+			}));
 
-		return _messageSender
-			.PublishAsync(
+		return messageSender.PublishAsync(
 			subject: AwcNatsConst.SchedulePublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(parameters)),
+			data: JsonSerializer.SerializeToUtf8Bytes(message),
 			cancellationToken: cancellationToken);
 	}
 }
