@@ -8,6 +8,7 @@ using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcFs;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcKm;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcLudo;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcPgs;
+using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcPinnacle;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcRcb;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcSg;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcSpade;
@@ -34,7 +35,8 @@ internal class ManualPullRecordCommandService(
 	ICommandService<AwcVenusManualCommand> awcVenusManualCommandService,
 	ICommandService<AwcYlManualCommand> awcYlManualCommandService,
 	ICommandService<AwcYesbingoManualCommand> awcYesbingoManualCommandService,
-	ICommandService<AwcBgManualCommand> awcBgManualCommandService) : ICommandService<ManualPullRecordCommand>
+	ICommandService<AwcBgManualCommand> awcBgManualCommandService,
+	ICommandService<AwcPinnacleManualCommand> awcPinnacleManualCommandService) : ICommandService<ManualPullRecordCommand>
 {
 	public ValueTask ExecuteAsync(ManualPullRecordCommand command, CancellationToken cancellationToken = default)
 		=> command.GameProviderCode.ToUpper() switch
@@ -166,6 +168,15 @@ internal class ManualPullRecordCommandService(
 					EndTime: command.EndTime),
 				cancellationToken: cancellationToken),
 			"AWC_BG" => awcBgManualCommandService.ExecuteAsync(
+				command: new(
+					GameProviderCode: command.GameProviderCode,
+					ApiUrl: command.ApiUrl,
+					AgentId: command.AgentId,
+					Cert: command.Cert,
+					StartTime: command.StartTime,
+					EndTime: command.EndTime),
+				cancellationToken: cancellationToken),
+			"AWC_PINNACLE" => awcPinnacleManualCommandService.ExecuteAsync(
 				command: new(
 					GameProviderCode: command.GameProviderCode,
 					ApiUrl: command.ApiUrl,
