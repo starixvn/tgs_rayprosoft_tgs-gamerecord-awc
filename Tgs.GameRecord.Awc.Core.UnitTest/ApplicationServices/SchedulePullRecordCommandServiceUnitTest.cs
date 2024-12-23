@@ -13,6 +13,7 @@ using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcFs;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcKm;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcLudo;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcPgs;
+using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcPinnacle;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcRcb;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcSg;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcSpade;
@@ -26,21 +27,22 @@ namespace Tgs.GameRecord.Awc.Core.UnitTest.ApplicationServices;
 public class SchedulePullRecordCommandServiceUnitTest
 {
 	[Theory]
-	[InlineData("AWC_AELOTTO", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_AWS", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_COCKFIGHT", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_FACAI", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_FS", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_KM", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_LUDO", 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_PGS", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_RCB", 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_SG", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_SPADE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0)]
-	[InlineData("AWC_VENUS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)]
-	[InlineData("AWC_YL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)]
-	[InlineData("AWC_YESBINGO", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0)]
-	[InlineData("AWC_BG", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)]
+	[InlineData("AWC_AELOTTO", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_AWS", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_COCKFIGHT", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_FACAI", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_FS", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_KM", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_LUDO", 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_PGS", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_RCB", 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_SG", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_SPADE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_VENUS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0)]
+	[InlineData("AWC_YL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)]
+	[InlineData("AWC_YESBINGO", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)]
+	[InlineData("AWC_BG", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0)]
+	[InlineData("AWC_PINNACLE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)]
 	public async Task ExecuteAsync(
 		string game_provider_code,
 		int awc_aelotto,
@@ -57,7 +59,8 @@ public class SchedulePullRecordCommandServiceUnitTest
 		int awc_venus,
 		int awc_yl,
 		int awc_yesbingo,
-		int awc_bg)
+		int awc_bg,
+		int awc_pinnacle)
 	{
 		var fakeAwcAelottoScheduleCommandService = Substitute.For<ICommandService<AwcAelottoScheduleCommand>>();
 		var fakeAwcAwsScheduleCommandService = Substitute.For<ICommandService<AwcAwsScheduleCommand>>();
@@ -74,6 +77,7 @@ public class SchedulePullRecordCommandServiceUnitTest
 		var fakeAwcYlScheduleCommandService = Substitute.For<ICommandService<AwcYlScheduleCommand>>();
 		var fakeAwcYesbingoScheduleCommandService = Substitute.For<ICommandService<AwcYesbingoScheduleCommand>>();
 		var fakeAwcBgScheduleCommandService = Substitute.For<ICommandService<AwcBgScheduleCommand>>();
+		var fakeAwcPinnacleScheduleCommandService = Substitute.For<ICommandService<AwcPinnacleScheduleCommand>>();
 
 		var command = new SchedulePullRecordCommand(
 			ApiUrl: new("http://localhost/"),
@@ -97,7 +101,8 @@ public class SchedulePullRecordCommandServiceUnitTest
 			fakeAwcVenusScheduleCommandService,
 			fakeAwcYlScheduleCommandService,
 			fakeAwcYesbingoScheduleCommandService,
-			fakeAwcBgScheduleCommandService);
+			fakeAwcBgScheduleCommandService,
+			fakeAwcPinnacleScheduleCommandService);
 
 		await sut.ExecuteAsync(command);
 
@@ -265,5 +270,16 @@ public class SchedulePullRecordCommandServiceUnitTest
 				compare.Cert == command.Cert &&
 				compare.StartTime == command.StartTime),
 			cancellationToken: Arg.Any<CancellationToken>());
+
+		_ = fakeAwcPinnacleScheduleCommandService
+			.Received(awc_pinnacle)
+			.ExecuteAsync(
+				command: Arg.Is<AwcPinnacleScheduleCommand>(
+					compare => compare.GameProviderCode == command.GameProviderCode &&
+					           compare.ApiUrl == command.ApiUrl &&
+					           compare.AgentId == command.AgentId &&
+					           compare.Cert == command.Cert &&
+					           compare.StartTime == command.StartTime),
+				cancellationToken: Arg.Any<CancellationToken>());
 	}
 }

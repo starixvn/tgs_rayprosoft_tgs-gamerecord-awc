@@ -13,6 +13,7 @@ using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcFs;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcKm;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcLudo;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcPgs;
+using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcPinnacle;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcRcb;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcSg;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcSpade;
@@ -26,21 +27,22 @@ namespace Tgs.GameRecord.Awc.Core.UnitTest.ApplicationServices;
 public class ManualPullRecordCommandServiceUnitTest
 {
 	[Theory]
-	[InlineData("AWC_AELOTTO", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_AWS", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_COCKFIGHT", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_FACAI", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_FS", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_KM", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_LUDO", 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_PGS", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_RCB", 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_SG", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0)]
-	[InlineData("AWC_SPADE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0)]
-	[InlineData("AWC_VENUS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)]
-	[InlineData("AWC_YL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)]
-	[InlineData("AWC_YESBINGO", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0)]
-	[InlineData("AWC_BG", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)]
+	[InlineData("AWC_AELOTTO", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_AWS", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_COCKFIGHT", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_FACAI", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_FS", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_KM", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_LUDO", 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_PGS", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_RCB", 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_SG", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_SPADE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0)]
+	[InlineData("AWC_VENUS", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0)]
+	[InlineData("AWC_YL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0)]
+	[InlineData("AWC_YESBINGO", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)]
+	[InlineData("AWC_BG", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0)]
+	[InlineData("AWC_PINNACLE", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1)]
 	public async Task ExecuteAsync(
 		string game_provider_code,
 		int awc_aelotto,
@@ -57,7 +59,8 @@ public class ManualPullRecordCommandServiceUnitTest
 		int awc_venus,
 		int awc_yl,
 		int awc_yesbingo,
-		int awc_bg)
+		int awc_bg,
+		int awc_pinnacle)
 	{
 		var fakeAwcAelottoManualCommandService = Substitute.For<ICommandService<AwcAelottoManualCommand>>();
 		var fakeAwcAwsManualCommandService = Substitute.For<ICommandService<AwcAwsManualCommand>>();
@@ -74,6 +77,7 @@ public class ManualPullRecordCommandServiceUnitTest
 		var fakeAwcYlManualCommandService = Substitute.For<ICommandService<AwcYlManualCommand>>();
 		var fakeAwcYesbingoManualCommandService = Substitute.For<ICommandService<AwcYesbingoManualCommand>>();
 		var fakeAwcBgManualCommandService = Substitute.For<ICommandService<AwcBgManualCommand>>();
+		var fakeAwcPinnacleManualCommandService = Substitute.For<ICommandService<AwcPinnacleManualCommand>>();
 
 		var command = new ManualPullRecordCommand(
 			ApiUrl: new("http://localhost/"),
@@ -98,7 +102,8 @@ public class ManualPullRecordCommandServiceUnitTest
 			fakeAwcVenusManualCommandService,
 			fakeAwcYlManualCommandService,
 			fakeAwcYesbingoManualCommandService,
-			fakeAwcBgManualCommandService);
+			fakeAwcBgManualCommandService,
+			fakeAwcPinnacleManualCommandService);
 
 		await sut.ExecuteAsync(command);
 
@@ -281,5 +286,17 @@ public class ManualPullRecordCommandServiceUnitTest
 				compare.StartTime == command.StartTime &&
 				compare.EndTime == command.EndTime),
 			cancellationToken: Arg.Any<CancellationToken>());
+
+		_ = fakeAwcPinnacleManualCommandService
+			.Received(awc_pinnacle)
+			.ExecuteAsync(
+				command: Arg.Is<AwcPinnacleManualCommand>(
+					compare => compare.GameProviderCode == command.GameProviderCode &&
+					           compare.ApiUrl == command.ApiUrl &&
+					           compare.AgentId == command.AgentId &&
+					           compare.Cert == command.Cert &&
+					           compare.StartTime == command.StartTime &&
+					           compare.EndTime == command.EndTime),
+				cancellationToken: Arg.Any<CancellationToken>());
 	}
 }
