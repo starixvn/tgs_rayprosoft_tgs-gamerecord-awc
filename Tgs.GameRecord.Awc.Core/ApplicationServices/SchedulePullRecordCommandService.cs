@@ -7,6 +7,7 @@ using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcFs;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcKm;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcLudo;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcPgs;
+using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcPinnacle;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcRcb;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcSg;
 using Tgs.GameRecord.Awc.Core.ApplicationServices.AwcSpade;
@@ -33,7 +34,8 @@ internal class SchedulePullRecordCommandService(
 	ICommandService<AwcVenusScheduleCommand> awcVenusScheduleCommandService,
 	ICommandService<AwcYlScheduleCommand> awcYlScheduleCommandService,
 	ICommandService<AwcYesbingoScheduleCommand> awcYesbingoScheduleCommandService,
-	ICommandService<AwcBgScheduleCommand> awcBgScheduleCommandService) : ICommandService<SchedulePullRecordCommand>
+	ICommandService<AwcBgScheduleCommand> awcBgScheduleCommandService,
+	ICommandService<AwcPinnacleScheduleCommand> awcPinnacleScheduleCommandService) : ICommandService<SchedulePullRecordCommand>
 {
 	public ValueTask ExecuteAsync(SchedulePullRecordCommand command, CancellationToken cancellationToken = default)
 			=> command.GameProviderCode.ToUpper() switch
@@ -151,6 +153,14 @@ internal class SchedulePullRecordCommandService(
 						StartTime: command.StartTime),
 					cancellationToken),
 				"AWC_BG" => awcBgScheduleCommandService.ExecuteAsync(
+					command: new(
+						GameProviderCode: command.GameProviderCode,
+						ApiUrl: command.ApiUrl,
+						AgentId: command.AgentId,
+						Cert: command.Cert,
+						StartTime: command.StartTime),
+					cancellationToken),
+				"AWC_PINNACLE" => awcPinnacleScheduleCommandService.ExecuteAsync(
 					command: new(
 						GameProviderCode: command.GameProviderCode,
 						ApiUrl: command.ApiUrl,
